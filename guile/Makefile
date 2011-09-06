@@ -1,15 +1,16 @@
+CFLAGS=-Wall
 LIBS=`pkg-config --libs guile-1.8`
 
 all: guile-mpi
 
 guile-mpi: guile-mpi.o libguile-comm.o
-	mpicc -o $(@) $(^) $(LIBS)
+	mpicc $(CFLAGS) -o $(@) $(^) $(LIBS)
 
 %.o: %.c
-	mpicc -c $(<)
+	mpicc $(CFLAGS) -c $(<)
 
 %.so: %.c
-	mpicc -shared -o $(@) -fPIC $(<)
+	mpicc $(CFLAGS) -shared -o $(@) -fPIC $(<)
 
 
 clean:
