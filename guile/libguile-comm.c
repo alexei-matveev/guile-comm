@@ -82,7 +82,7 @@ comm_t_print (SCM world, SCM port, scm_print_state *pstate)
 
 SCM comm_init (SCM args) // MPI_Init
 {
-    int ierr, argc;
+    int argc;
     char **argv;
 
     argv = scm_i_allocate_string_pointers (args);
@@ -91,7 +91,7 @@ SCM comm_init (SCM args) // MPI_Init
     for (argc = 0; argv[argc]; argc++)
         ;
 
-    ierr = MPI_Init (&argc, &argv);
+    int ierr = MPI_Init (&argc, &argv);
     assert(MPI_SUCCESS==ierr);
 
     // return scm_from_int (ierr);
@@ -100,16 +100,14 @@ SCM comm_init (SCM args) // MPI_Init
 
 SCM comm_finalize (void) // MPI_Finalize
 {
-  int ierr;
-
-  ierr = MPI_Finalize ();
+  int ierr = MPI_Finalize ();
 
   return scm_from_int (ierr);
 }
 
 SCM comm_rank (SCM world) // MPI_Comm_rank(world, ...)
 {
-    int rank, ierr;
+    int rank;
 
     // extract MPI_Comm, verifies the type:
     MPI_Comm comm = comm_t_comm (world);
@@ -117,7 +115,7 @@ SCM comm_rank (SCM world) // MPI_Comm_rank(world, ...)
     // there is only one so far:
     assert(MPI_COMM_WORLD==comm);
 
-    ierr = MPI_Comm_rank (comm, &rank);
+    int ierr = MPI_Comm_rank (comm, &rank);
     assert(MPI_SUCCESS==ierr);
 
     return scm_from_int (rank);
@@ -125,7 +123,7 @@ SCM comm_rank (SCM world) // MPI_Comm_rank(world, ...)
 
 SCM comm_size (SCM world) // MPI_Comm_size(world, ...)
 {
-    int size, ierr;
+    int size;
 
     // extract MPI_Comm, verifies the type:
     MPI_Comm comm = comm_t_comm (world);
@@ -133,7 +131,7 @@ SCM comm_size (SCM world) // MPI_Comm_size(world, ...)
     // there is only one so far:
     assert(MPI_COMM_WORLD==comm);
 
-    ierr = MPI_Comm_size (comm, &size);
+    int ierr = MPI_Comm_size (comm, &size);
     assert(MPI_SUCCESS==ierr);
 
     return scm_from_int (size);
