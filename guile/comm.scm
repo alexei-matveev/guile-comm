@@ -1,15 +1,16 @@
 ;(define libguile-comm (dynamic-link "./libguile-comm.so"))
 ;(dynamic-call "init_guile_comm" libguile-comm)
 
-(display "A") (newline)
+(display "before") (newline)
 
-(define comm-world
+(define world
     (comm-init (command-line)))
 
-(display "B") (display (comm-rank)) (newline)
+(display "world=") (display world) (newline)
 
-(display "comm-world") (display comm-world)
+(display "rank=") (display (comm-rank world)) (newline)
+(display "size=") (display (comm-size world)) (newline)
 
 (comm-finalize)
 
-(display "C") (newline)
+(display "after") (newline)

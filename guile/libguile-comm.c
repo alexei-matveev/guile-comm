@@ -3,7 +3,7 @@
 #include <assert.h>
 
 //
-// Guile identifies SMOBs (small objects) by tags:
+// Guile identifies SMOB (small objects) types by tags:
 //
 static scm_t_bits comm_t_tag;
 
@@ -15,6 +15,9 @@ struct comm_t {
     MPI_Comm comm;
 };
 
+//
+// This converts an MPI_Comm to a comm_t SMOB:
+//
 static
 SCM comm_t_make (const MPI_Comm comm) // comm-init wants to return MPI_COMM_WORLD
 {
@@ -34,6 +37,17 @@ SCM comm_t_make (const MPI_Comm comm) // comm-init wants to return MPI_COMM_WORL
     // ...
 
     return smob;
+}
+
+//
+// This converts a comm_t SMOB to an MPI_Comm:
+//
+static
+MPI_Comm comm_t_comm (const SCM smob)
+{
+    struct comm_t *ptr = (struct comm_t *) SCM_SMOB_DATA (smob);
+
+    return ptr->comm;
 }
 
 SCM comm_init (SCM args) // MPI_Init
@@ -63,24 +77,40 @@ SCM comm_finalize (void) // MPI_Finalize
   return scm_from_int (ierr);
 }
 
-SCM comm_rank (void) // MPI_Comm_rank(MPI_COMM_WORLD, ...)
+SCM comm_rank (SCM world) // MPI_Comm_rank(world, ...)
 {
-  int rank, ierr;
+    int rank, ierr;
 
-  ierr = MPI_Comm_rank (MPI_COMM_WORLD, &rank);
-  assert(MPI_SUCCESS==ierr);
+    scm_assert_smob_type (comm_t_tag, world);
 
-  return scm_from_int (rank);
+    // extract MPI_Comm:
+    MPI_Comm comm = comm_t_comm (world);
+
+    // there is only one so far:
+    assert(comm==MPI_COMM_WORLD);
+
+    ierr = MPI_Comm_rank (comm, &rank);
+    assert(MPI_SUCCESS==ierr);
+
+    return scm_from_int (rank);
 }
 
-SCM comm_size (void) // MPI_Comm_size(MPI_COMM_WORLD, ...)
+SCM comm_size (SCM world) // MPI_Comm_size(world, ...)
 {
-  int size, ierr;
+    int size, ierr;
 
-  ierr = MPI_Comm_size (MPI_COMM_WORLD, &size);
-  assert(MPI_SUCCESS==ierr);
+    scm_assert_smob_type (comm_t_tag, world);
 
-  return scm_from_int (size);
+    // extract MPI_Comm:
+    MPI_Comm comm = comm_t_comm (world);
+
+    // there is only one so far:
+    assert(comm==MPI_COMM_WORLD);
+
+    ierr = MPI_Comm_size (comm, &size);
+    assert(MPI_SUCCESS==ierr);
+
+    return scm_from_int (size);
 }
 
 void init_guile_comm (void)
@@ -94,6 +124,6 @@ void init_guile_comm (void)
 
     scm_c_define_gsubr ("comm-init", 1, 0, 0, comm_init);
     scm_c_define_gsubr ("comm-finalize", 0, 0, 0, comm_finalize);
-    scm_c_define_gsubr ("comm-rank", 0, 0, 0, comm_rank);
-    scm_c_define_gsubr ("comm-size", 0, 0, 0, comm_size);
+    scm_c_define_gsubr ("comm-rank", 1, 0, 0, comm_rank);
+    scm_c_define_gsubr ("comm-size", 1, 0, 0, comm_size);
 }
