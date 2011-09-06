@@ -2,6 +2,9 @@
 #include <mpi.h>
 #include <assert.h>
 
+// example parallel code:
+#include "pi.h"
+
 //
 // Guile identifies SMOB (small objects) types by tags:
 //
@@ -137,6 +140,25 @@ SCM comm_size (SCM world) // MPI_Comm_size(world, ...)
     return scm_from_int (size);
 }
 
+//
+// double comm_compute_pi (MPI_Comm world, int n);
+//
+SCM comm_compute_pi (SCM world, SCM n)
+{
+    // extract MPI_Comm, verifies the type:
+    MPI_Comm comm = comm_t_comm (world);
+
+    // there is only one so far:
+    assert(MPI_COMM_WORLD==comm);
+
+    int N = scm_to_int (n);
+
+    // compute PI in parallel:
+    double dbl = pi (comm, N);
+
+    return scm_from_double (dbl);
+}
+
 void init_guile_comm (void)
 {
     comm_t_tag = scm_make_smob_type ("comm", sizeof (struct comm_t));
@@ -150,4 +172,5 @@ void init_guile_comm (void)
     scm_c_define_gsubr ("comm-finalize", 0, 0, 0, comm_finalize);
     scm_c_define_gsubr ("comm-rank", 1, 0, 0, comm_rank);
     scm_c_define_gsubr ("comm-size", 1, 0, 0, comm_size);
+    scm_c_define_gsubr ("comm-compute-pi", 2, 0, 0, comm_compute_pi);
 }

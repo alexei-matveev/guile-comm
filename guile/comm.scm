@@ -11,6 +11,10 @@
 (display "rank=") (display (comm-rank world)) (newline)
 (display "size=") (display (comm-size world)) (newline)
 
+(define pi
+    (comm-compute-pi world 1000))
+(display "pi=") (display pi) (newline)
+
 (comm-finalize)
 
 (display "after") (newline)

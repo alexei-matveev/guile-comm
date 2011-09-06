@@ -3,7 +3,7 @@ LIBS=`pkg-config --libs guile-1.8`
 
 all: guile-mpi
 
-guile-mpi: guile-mpi.o libguile-comm.o
+guile-mpi: guile-mpi.o libguile-comm.o pi.o
 	mpicc $(CFLAGS) -o $(@) $(^) $(LIBS)
 
 %.o: %.c
