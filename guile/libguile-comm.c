@@ -52,6 +52,34 @@ MPI_Comm comm_t_comm (const SCM smob)
     return ptr->comm;
 }
 
+//
+// Not using custom print of comm_t SMOBs prints #<comm ...>
+// with a "random" ID inside
+//
+static int
+comm_t_print (SCM world, SCM port, scm_print_state *pstate)
+{
+    // extract MPI_Comm, verifies the type:
+    MPI_Comm comm = comm_t_comm (world);
+
+    // there is only one:
+    assert(MPI_COMM_WORLD==comm);
+
+    // some communicators have names associated with them:
+    char name[MPI_MAX_OBJECT_NAME];
+    int len;
+
+    int ierr = MPI_Comm_get_name(comm, name, &len);
+    assert(MPI_SUCCESS==ierr);
+
+    scm_puts ("#<comm ", port);
+    scm_puts (name, port);
+    scm_puts (">", port);
+
+    // non-zero means success:
+    return 1;
+}
+
 SCM comm_init (SCM args) // MPI_Init
 {
     int ierr, argc;
@@ -117,8 +145,8 @@ void init_guile_comm (void)
     /*
     scm_set_smob_mark (comm_t_tag, comm_t_mark);
     scm_set_smob_free (comm_t_tag, comm_t_free);
-    scm_set_smob_print (comm_t_tag, comm_t_print);
     */
+    scm_set_smob_print (comm_t_tag, comm_t_print);
 
     scm_c_define_gsubr ("comm-init", 1, 0, 0, comm_init);
     scm_c_define_gsubr ("comm-finalize", 0, 0, 0, comm_finalize);
