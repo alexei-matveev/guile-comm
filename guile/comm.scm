@@ -3,9 +3,12 @@
 
 (display "A") (newline)
 
-(comm-init (command-line))
+(define comm-world
+    (comm-init (command-line)))
 
 (display "B") (display (comm-rank)) (newline)
+
+(display "comm-world") (display comm-world)
 
 (comm-finalize)
 
