@@ -52,6 +52,9 @@ MPI_Comm comm_t_comm (const SCM smob)
 
     struct comm_t *ptr = (struct comm_t *) SCM_SMOB_DATA (smob);
 
+    // there is only one so far:
+    assert(MPI_COMM_WORLD==ptr->comm);
+
     return ptr->comm;
 }
 
@@ -103,9 +106,10 @@ SCM comm_init (SCM args) // MPI_Init
 
 SCM comm_finalize (void) // MPI_Finalize
 {
-  int ierr = MPI_Finalize ();
+    int ierr = MPI_Finalize ();
+    assert(MPI_SUCCESS==ierr);
 
-  return scm_from_int (ierr);
+    return scm_from_int (ierr);
 }
 
 SCM comm_rank (SCM world) // MPI_Comm_rank(world, ...)
@@ -114,9 +118,6 @@ SCM comm_rank (SCM world) // MPI_Comm_rank(world, ...)
 
     // extract MPI_Comm, verifies the type:
     MPI_Comm comm = comm_t_comm (world);
-
-    // there is only one so far:
-    assert(MPI_COMM_WORLD==comm);
 
     int ierr = MPI_Comm_rank (comm, &rank);
     assert(MPI_SUCCESS==ierr);
@@ -131,13 +132,21 @@ SCM comm_size (SCM world) // MPI_Comm_size(world, ...)
     // extract MPI_Comm, verifies the type:
     MPI_Comm comm = comm_t_comm (world);
 
-    // there is only one so far:
-    assert(MPI_COMM_WORLD==comm);
-
     int ierr = MPI_Comm_size (comm, &size);
     assert(MPI_SUCCESS==ierr);
 
     return scm_from_int (size);
+}
+
+SCM comm_barrier (SCM world) // MPI_Barrier(world, ...)
+{
+    // extract MPI_Comm, verifies the type:
+    MPI_Comm comm = comm_t_comm (world);
+
+    int ierr = MPI_Barrier (comm);
+    assert(MPI_SUCCESS==ierr);
+
+    return scm_from_int (ierr);
 }
 
 //
@@ -147,9 +156,6 @@ SCM comm_pi (SCM world, SCM n)
 {
     // extract MPI_Comm, verifies the type:
     MPI_Comm comm = comm_t_comm (world);
-
-    // there is only one so far:
-    assert(MPI_COMM_WORLD==comm);
 
     int N = scm_to_int (n);
 
@@ -172,5 +178,6 @@ void init_guile_comm (void)
     scm_c_define_gsubr ("comm-finalize", 0, 0, 0, comm_finalize);
     scm_c_define_gsubr ("comm-rank", 1, 0, 0, comm_rank);
     scm_c_define_gsubr ("comm-size", 1, 0, 0, comm_size);
+    scm_c_define_gsubr ("comm-barrier", 1, 0, 0, comm_barrier);
     scm_c_define_gsubr ("comm-pi", 2, 0, 0, comm_pi);
 }
