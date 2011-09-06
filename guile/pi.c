@@ -1,5 +1,6 @@
 #include <mpi.h>
 #include <assert.h>
+// #include <stdio.h>
 
 double pi (MPI_Comm world, int n)
 {
@@ -8,7 +9,7 @@ double pi (MPI_Comm world, int n)
     rc = MPI_Comm_size (world, &size);
     assert(MPI_SUCCESS==rc);
 
-    rc = MPI_Comm_rank(world, &rank);
+    rc = MPI_Comm_rank (world, &rank);
     assert(MPI_SUCCESS==rc);
 
     double h = 1.0 / n;
@@ -23,6 +24,8 @@ double pi (MPI_Comm world, int n)
     double sum;
     rc = MPI_Allreduce (&partial, &sum, 1, MPI_DOUBLE, MPI_SUM, world);
     assert(MPI_SUCCESS==rc);
+
+    // printf("%d of %d pi = %f computed from %d terms\n", rank, size, sum, n);
 
     return sum;
 }

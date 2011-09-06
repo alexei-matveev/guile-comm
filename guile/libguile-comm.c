@@ -141,9 +141,9 @@ SCM comm_size (SCM world) // MPI_Comm_size(world, ...)
 }
 
 //
-// double comm_compute_pi (MPI_Comm world, int n);
+// double comm_pi (MPI_Comm world, int n);
 //
-SCM comm_compute_pi (SCM world, SCM n)
+SCM comm_pi (SCM world, SCM n)
 {
     // extract MPI_Comm, verifies the type:
     MPI_Comm comm = comm_t_comm (world);
@@ -172,5 +172,5 @@ void init_guile_comm (void)
     scm_c_define_gsubr ("comm-finalize", 0, 0, 0, comm_finalize);
     scm_c_define_gsubr ("comm-rank", 1, 0, 0, comm_rank);
     scm_c_define_gsubr ("comm-size", 1, 0, 0, comm_size);
-    scm_c_define_gsubr ("comm-compute-pi", 2, 0, 0, comm_compute_pi);
+    scm_c_define_gsubr ("comm-pi", 2, 0, 0, comm_pi);
 }
