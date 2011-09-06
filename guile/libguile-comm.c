@@ -45,6 +45,8 @@ SCM comm_t_make (const MPI_Comm comm) // comm-init wants to return MPI_COMM_WORL
 static
 MPI_Comm comm_t_comm (const SCM smob)
 {
+    scm_assert_smob_type (comm_t_tag, smob);
+
     struct comm_t *ptr = (struct comm_t *) SCM_SMOB_DATA (smob);
 
     return ptr->comm;
@@ -81,13 +83,11 @@ SCM comm_rank (SCM world) // MPI_Comm_rank(world, ...)
 {
     int rank, ierr;
 
-    scm_assert_smob_type (comm_t_tag, world);
-
-    // extract MPI_Comm:
+    // extract MPI_Comm, verifies the type:
     MPI_Comm comm = comm_t_comm (world);
 
     // there is only one so far:
-    assert(comm==MPI_COMM_WORLD);
+    assert(MPI_COMM_WORLD==comm);
 
     ierr = MPI_Comm_rank (comm, &rank);
     assert(MPI_SUCCESS==ierr);
@@ -99,13 +99,11 @@ SCM comm_size (SCM world) // MPI_Comm_size(world, ...)
 {
     int size, ierr;
 
-    scm_assert_smob_type (comm_t_tag, world);
-
-    // extract MPI_Comm:
+    // extract MPI_Comm, verifies the type:
     MPI_Comm comm = comm_t_comm (world);
 
     // there is only one so far:
-    assert(comm==MPI_COMM_WORLD);
+    assert(MPI_COMM_WORLD==comm);
 
     ierr = MPI_Comm_size (comm, &size);
     assert(MPI_SUCCESS==ierr);
