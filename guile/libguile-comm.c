@@ -86,6 +86,31 @@ comm_t_print (SCM world, SCM port, scm_print_state *pstate)
     return 1;
 }
 
+//
+// Set a name on a communicator:
+//
+SCM comm_set_name (SCM world, SCM name)
+{
+    // extract MPI_Comm, verifies the type:
+    MPI_Comm comm = comm_t_comm (world);
+
+    // some communicators have names associated with them:
+    char cname[MPI_MAX_OBJECT_NAME];
+
+    // does not null-terninate:
+    int len = scm_to_locale_stringbuf (name, cname, MPI_MAX_OBJECT_NAME);
+
+    if ( len > MPI_MAX_OBJECT_NAME )
+        len = MPI_MAX_OBJECT_NAME;
+
+    cname[len] = 0;
+
+    int ierr = MPI_Comm_set_name(comm, cname);
+    assert(MPI_SUCCESS==ierr);
+
+    return scm_from_int (len);
+}
+
 SCM comm_init (SCM args) // MPI_Init
 {
     int argc;
@@ -220,5 +245,6 @@ void init_guile_comm (void)
     scm_c_define_gsubr ("comm-barrier", 1, 0, 0, comm_barrier);
     scm_c_define_gsubr ("comm-split", 2, 0, 0, comm_split);
     scm_c_define_gsubr ("comm-free", 1, 0, 0, comm_free);
+    scm_c_define_gsubr ("comm-set-name", 2, 0, 0, comm_set_name);
     scm_c_define_gsubr ("comm-pi", 2, 0, 0, comm_pi);
 }
