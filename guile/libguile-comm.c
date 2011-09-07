@@ -112,7 +112,7 @@ SCM comm_finalize (void) // MPI_Finalize
     return scm_from_int (ierr);
 }
 
-SCM comm_rank (SCM world) // MPI_Comm_rank(world, ...)
+SCM comm_rank (SCM world) // MPI_Comm_rank (world, ...)
 {
     int rank;
 
@@ -125,7 +125,7 @@ SCM comm_rank (SCM world) // MPI_Comm_rank(world, ...)
     return scm_from_int (rank);
 }
 
-SCM comm_size (SCM world) // MPI_Comm_size(world, ...)
+SCM comm_size (SCM world) // MPI_Comm_size (world, ...)
 {
     int size;
 
@@ -138,7 +138,7 @@ SCM comm_size (SCM world) // MPI_Comm_size(world, ...)
     return scm_from_int (size);
 }
 
-SCM comm_barrier (SCM world) // MPI_Barrier(world, ...)
+SCM comm_barrier (SCM world) // MPI_Barrier (world, ...)
 {
     // extract MPI_Comm, verifies the type:
     MPI_Comm comm = comm_t_comm (world);
