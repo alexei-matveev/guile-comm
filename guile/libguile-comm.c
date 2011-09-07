@@ -11,6 +11,11 @@
 static scm_t_bits comm_t_tag;
 
 //
+// Try exposing MPI_COMM_WORLD:
+//
+static SCM comm_world;
+
+//
 // Implementation of MPI_Comm may be very different,
 // e.g. a struct pointer in OpenMPI or an int in MPICH:
 //
@@ -247,4 +252,7 @@ void init_guile_comm (void)
     scm_c_define_gsubr ("comm-free", 1, 0, 0, comm_free);
     scm_c_define_gsubr ("comm-set-name", 2, 0, 0, comm_set_name);
     scm_c_define_gsubr ("comm-pi", 2, 0, 0, comm_pi);
+
+    // constants and variables:
+    comm_world = scm_permanent_object (scm_c_define ("comm-world", comm_t_make (MPI_COMM_WORLD)));
 }
