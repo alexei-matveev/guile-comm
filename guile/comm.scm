@@ -43,9 +43,9 @@
 
 ;; even output first, odd second:
 (comm-barrier world)
-(if (= color 0) (for-each-rank country (lambda () (display pi))))
+(if (= color 0) (for-each-rank country (lambda () (display pi-2))))
 (comm-barrier world)
-(if (= color 1) (for-each-rank country (lambda () (display pi))))
+(if (= color 1) (for-each-rank country (lambda () (display pi-2))))
 
 ;; release communicators:
 (comm-free country)
