@@ -36,8 +36,7 @@
 
 ;; group even and odd workers into communication groups:
 (define country (comm-split world color))
-(if (= color 0) (comm-set-name country "even"))
-(if (= color 1) (comm-set-name country "odd"))
+(comm-set-name country (if (= color 0) "even" "odd"))
 ;; (display country)(newline)
 
 ;; let the two groups compete in computing the pi again:
