@@ -3,7 +3,7 @@
 
 ;; returns MPI_COMM_WORLD:
 (define world
-    (comm-init (command-line)))
+  (comm-init (command-line)))
 
 ;; size and rank are communicator specific:
 (define size (comm-size world))
@@ -11,22 +11,46 @@
 
 ;; compute PI in parallel:
 (define pi
-    (comm-pi world 1000000000))
+  (comm-pi world 10000000))
 
 ;; Loop over ranks with communication barriers inbetween
 ;; for proper output formatting:
-(let loop ((p 0))
+(define (for-each-rank-display world var)
+  (let loop ((p 0) (size (comm-size world)))
     (if (< p size)
-        (begin
-            (if (equal? rank p)
-                (begin
-                    (display "comm = ") (display world)
-                    (display " rank = ") (display p)
-                    (display " of ") (display size)
-                    (display " pi = ") (display pi)
-                    (newline)))
-            (comm-barrier world)
-            (loop (+ p 1)))))
+      (begin
+        (if (= p (comm-rank world)) ; then it is my turn to act ...
+          (begin
+            (display "comm = ") (display world)
+            (display " rank = ") (display p)
+            (display " of ") (display size)
+            (display " var = ") (display var) ; FIXME: pass the code, not var
+            (newline)))
+        (comm-barrier world) ; others wait here until I finish ...
+        (loop (+ p 1) size)))))
+
+(for-each-rank-display world pi)
+
+;; each worker is either even or odd:
+(define color (modulo rank 2))
+
+;; group even and odd workers into communication groups:
+(define country (comm-split world color))
+;; (display country)(newline)
+
+;; let the two groups compete in computing the pi again:
+(define pi-2 (comm-pi country 1000))
+
+;; even output first, odd second:
+(comm-barrier world)
+(if (= color 0) (for-each-rank-display country pi-2))
+(comm-barrier world)
+(if (= color 1) (for-each-rank-display country pi-2))
+
+;; release communicators:
+(comm-free country)
 
 ;; required by MPI:
 (comm-finalize)
+
+;; options for vim:sw=2:expandtab:smarttab:autoindent:syntax
