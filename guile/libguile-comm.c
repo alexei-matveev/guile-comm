@@ -53,7 +53,7 @@ MPI_Comm comm_t_comm (const SCM smob)
     struct comm_t *ptr = (struct comm_t *) SCM_SMOB_DATA (smob);
 
     // there is only one so far:
-    assert(MPI_COMM_WORLD==ptr->comm);
+    // NO MORE: assert(MPI_COMM_WORLD==ptr->comm);
 
     return ptr->comm;
 }
@@ -69,7 +69,7 @@ comm_t_print (SCM world, SCM port, scm_print_state *pstate)
     MPI_Comm comm = comm_t_comm (world);
 
     // there is only one:
-    assert(MPI_COMM_WORLD==comm);
+    // NO MORE: assert(MPI_COMM_WORLD==comm);
 
     // some communicators have names associated with them:
     char name[MPI_MAX_OBJECT_NAME];
@@ -149,6 +149,30 @@ SCM comm_barrier (SCM world) // MPI_Barrier(world, ...)
     return scm_from_int (ierr);
 }
 
+SCM comm_split (SCM world, SCM color) // MPI_Comm_split (world, color, ...)
+{
+    int ierr;
+
+    // extract MPI_Comm, verifies the type:
+    MPI_Comm comm = comm_t_comm (world);
+
+    // color will define the coutries:
+    int icolor = scm_to_int (color);
+
+    // key defines the rank assignment within the country,
+    // use world ranks for that:
+    int key;
+    ierr = MPI_Comm_rank (comm, &key);
+    assert(MPI_SUCCESS==ierr);
+
+    MPI_Comm country; // part of the world of the same color
+
+    ierr = MPI_Comm_split (comm, icolor, key, &country);
+    assert(MPI_SUCCESS==ierr);
+
+    return comm_t_make(country);
+}
+
 //
 // double comm_pi (MPI_Comm world, int n);
 //
@@ -179,5 +203,6 @@ void init_guile_comm (void)
     scm_c_define_gsubr ("comm-rank", 1, 0, 0, comm_rank);
     scm_c_define_gsubr ("comm-size", 1, 0, 0, comm_size);
     scm_c_define_gsubr ("comm-barrier", 1, 0, 0, comm_barrier);
+    scm_c_define_gsubr ("comm-split", 2, 0, 0, comm_split);
     scm_c_define_gsubr ("comm-pi", 2, 0, 0, comm_pi);
 }
