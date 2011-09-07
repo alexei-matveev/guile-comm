@@ -14,7 +14,7 @@
   (comm-pi world 10000000))
 
 ;; Loop over ranks with communication barriers inbetween
-;; for proper output formatting:
+;; for proper output formatting (does not always work):
 (define (for-each-rank world proc)
   (let loop ((p 0) (size (comm-size world)))
     (if (< p size)
