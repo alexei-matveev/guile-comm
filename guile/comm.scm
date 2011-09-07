@@ -15,21 +15,21 @@
 
 ;; Loop over ranks with communication barriers inbetween
 ;; for proper output formatting:
-(define (for-each-rank-display world var)
+(define (for-each-rank world proc)
   (let loop ((p 0) (size (comm-size world)))
     (if (< p size)
       (begin
         (if (= p (comm-rank world)) ; then it is my turn to act ...
           (begin
-            (display "comm = ") (display world)
-            (display " rank = ") (display p)
-            (display " of ") (display size)
-            (display " var = ") (display var) ; FIXME: pass the code, not var
+            (display "comm = ")(display world)
+            (display " rank = ")(display p)
+            (display " of ")(display size)(display " ")
+            (proc) ; lambda without args
             (newline)))
         (comm-barrier world) ; others wait here until I finish ...
         (loop (+ p 1) size)))))
 
-(for-each-rank-display world pi)
+(for-each-rank world (lambda () (display pi)))
 
 ;; each worker is either even or odd:
 (define color (modulo rank 2))
@@ -43,9 +43,9 @@
 
 ;; even output first, odd second:
 (comm-barrier world)
-(if (= color 0) (for-each-rank-display country pi-2))
+(if (= color 0) (for-each-rank country (lambda () (display pi))))
 (comm-barrier world)
-(if (= color 1) (for-each-rank-display country pi-2))
+(if (= color 1) (for-each-rank country (lambda () (display pi))))
 
 ;; release communicators:
 (comm-free country)
