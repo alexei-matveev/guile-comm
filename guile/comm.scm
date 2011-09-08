@@ -72,30 +72,28 @@
 ;; release communicators:
 (comm-free country)
 
-; (comm-barrier world)
+(comm-barrier world)
 
 ;;
 ;; FIXME: ugly abstraction:
 ;;
 ;; ping-pong, FIXME: this will dead-lock with odd number of workers:
-; (let
-;   ((right (modulo (+ rank 1) size)) ; right peer
-;   (left (modulo (- rank 1) size)) ; left peer
-;   (token (+ rank 1000))
-;   (tag 999))
-;     (begin
-;       (if (= color 0) ; even send, odd receive ...
-;         (comm-send world right tag token)        ; on even
-;         (let ((ping (comm-recv world left tag))) ; on odd
-;           (display "rank = ")(display rank)
-;           (display " received ping ")(display ping)
-;           (newline)))
-;       (if (= color 1) ; odd send, even receive ...
-;         (comm-send world left tag token)          ; on odd
-;         (let ((pong (comm-recv world right tag))) ; on even
-;           (display "rank = ")(display rank)
-;           (display " received pong ")(display pong)
-;           (newline)))))
+(let
+  ((right (modulo (+ rank 1) size)) ; right peer
+  (left (modulo (- rank 1) size)) ; left peer
+  (token (+ rank 1000))
+  (tag 999))
+    (begin
+      (if (= color 0) ; even send, odd receive ...
+        (comm-send world right tag token)        ; on even
+        (let ((ping (comm-recv world left tag))) ; on odd
+          (display (list rank "recv ping" ping))
+          (newline)))
+      (if (= color 1) ; odd send, even receive ...
+        (comm-send world left tag token)          ; on odd
+        (let ((pong (comm-recv world right tag))) ; on even
+          (display (list rank "recv pong" pong))
+          (newline)))))
 
 ;; required by MPI:
 (comm-finalize)
