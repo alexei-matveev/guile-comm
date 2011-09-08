@@ -5,6 +5,12 @@
 // example parallel code:
 #include "pi.h"
 
+static SCM comm_t_make (const MPI_Comm comm);
+static MPI_Comm comm_t_comm (const SCM smob);
+
+static SCM object_to_string (SCM obj);
+static SCM string_to_object (SCM obj);
+
 //
 // Guile identifies SMOB (small objects) types by tags:
 //
@@ -296,6 +302,47 @@ SCM comm_pi (SCM world, SCM n)
     return scm_from_double (dbl);
 }
 
+static
+SCM string_to_object (SCM str)
+{
+    SCM port = scm_open_input_string (str);
+
+    SCM obj = scm_read (port);
+
+    scm_close_port (port);
+
+    return obj;
+}
+
+#if 0
+
+static
+SCM object_to_string (SCM obj) // variant 1
+{
+    SCM port = scm_open_output_string ();
+
+    scm_write (obj, port);
+
+    // result = scm_strport_to_string (port);
+    SCM str = scm_get_output_string (port);
+
+    scm_close_port (port);
+
+    return str;
+}
+
+#else
+
+static
+SCM object_to_string (SCM obj) // variant 2
+{
+    SCM str = scm_object_to_string (obj, SCM_UNDEFINED);
+
+    return str;
+}
+
+#endif
+
 void init_guile_comm (void)
 {
     comm_t_tag = scm_make_smob_type ("comm", sizeof (struct comm_t));
@@ -319,6 +366,9 @@ void init_guile_comm (void)
     scm_c_define_gsubr ("comm-free", 1, 0, 0, comm_free);
     scm_c_define_gsubr ("comm-set-name", 2, 0, 0, comm_set_name);
     scm_c_define_gsubr ("comm-pi", 2, 0, 0, comm_pi);
+
+    // scm_c_define_gsubr ("object-to-string", 1, 0, 0, object_to_string);
+    // scm_c_define_gsubr ("string-to-object", 1, 0, 0, string_to_object);
 
     // constants and variables:
     comm_world = scm_permanent_object (scm_c_define ("comm-world", comm_t_make (MPI_COMM_WORLD)));
