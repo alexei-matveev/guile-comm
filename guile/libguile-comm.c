@@ -179,6 +179,40 @@ SCM comm_barrier (SCM world) // MPI_Barrier (world, ...)
     return scm_from_int (ierr);
 }
 
+SCM comm_send (SCM world, SCM dest, SCM tag, SCM data) // MPI_Send, note argument order
+{
+    // extract MPI_Comm, verifies the type:
+    MPI_Comm comm = comm_t_comm (world);
+
+    int idest = scm_to_int (dest);
+    int itag = scm_to_int (tag);
+
+    // FIXME: so far only works for ints:
+    int idata = scm_to_int (data);
+
+    int ierr = MPI_Send (&idata, 1, MPI_INT, idest, itag, comm);
+    assert(MPI_SUCCESS==ierr);
+
+    return scm_from_int (ierr);
+}
+
+SCM comm_recv (SCM world, SCM source, SCM tag) // MPI_Recv
+{
+    // extract MPI_Comm, verifies the type:
+    MPI_Comm comm = comm_t_comm (world);
+
+    int isource = scm_to_int (source);
+    int itag = scm_to_int (tag);
+
+    // FIXME: so far only excpecting ints:
+    int idata;
+    MPI_Status stat;
+    int ierr = MPI_Recv (&idata, 1, MPI_INT, isource, itag, comm, &stat);
+    assert(MPI_SUCCESS==ierr);
+
+    return scm_from_int (idata);
+}
+
 SCM comm_split (SCM world, SCM color) // MPI_Comm_split (world, color, ...)
 {
     int ierr;
@@ -248,6 +282,8 @@ void init_guile_comm (void)
     scm_c_define_gsubr ("comm-rank", 1, 0, 0, comm_rank);
     scm_c_define_gsubr ("comm-size", 1, 0, 0, comm_size);
     scm_c_define_gsubr ("comm-barrier", 1, 0, 0, comm_barrier);
+    scm_c_define_gsubr ("comm-send", 4, 0, 0, comm_send);
+    scm_c_define_gsubr ("comm-recv", 3, 0, 0, comm_recv);
     scm_c_define_gsubr ("comm-split", 2, 0, 0, comm_split);
     scm_c_define_gsubr ("comm-free", 1, 0, 0, comm_free);
     scm_c_define_gsubr ("comm-set-name", 2, 0, 0, comm_set_name);
