@@ -27,7 +27,7 @@
                 (loop (+ i 1) token)))))))
 
 ;;
-;; Compute PI in parallel:
+;; Compute PI in parallel (by calling native code with our communicator):
 ;;
 (define pi
   (comm-pi world 10000000))
