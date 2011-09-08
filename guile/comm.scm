@@ -13,6 +13,11 @@
 (define pi
   (comm-pi world 10000000))
 
+(define (display-my-id world)
+  (display "comm = ")(display world)
+  (display " rank = ")(display (comm-rank world))
+  (display " of ")(display (comm-size world)))
+
 ;; Loop over ranks with communication barriers inbetween
 ;; for proper output formatting (does not always work):
 (define (for-each-rank world proc)
@@ -21,9 +26,11 @@
       (begin
         (if (= p (comm-rank world)) ; then it is my turn to act ...
           (begin
-            (display "comm = ")(display world)
-            (display " rank = ")(display p)
-            (display " of ")(display size)(display " ")
+            ;;(display "comm = ")(display world)
+            ;;(display " rank = ")(display p)
+            ;;(display " of ")(display size)
+            (display-my-id world)
+            (display " ")
             (proc) ; lambda without args
             (newline)))
         (comm-barrier world) ; others wait here until I finish ...
