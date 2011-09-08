@@ -73,7 +73,7 @@
           (display "rank = ")(display rank)
           (display " received ping ")(display ping)
           (newline)))
-      (if (= color 1) ; even send, odd receive ...
+      (if (= color 1) ; odd send, even receive ...
         (comm-send world left tag token)          ; on odd
         (let ((pong (comm-recv world right tag))) ; on even
           (display "rank = ")(display rank)
