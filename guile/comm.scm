@@ -15,7 +15,7 @@
 (let
   ((right-peer (modulo (+ rank 1) size))
   (left-peer (modulo (- rank 1) size))
-  (token (+ rank 1000))  ; token to pass, rank specific
+  (token (list "token of rank" rank "with payload" (+ rank 0.1))) ; token to pass, rank specific
   (message-tag 999)) ; arbitrary number, same for every worker
     (begin
       (let loop ((i 0) (token token))
