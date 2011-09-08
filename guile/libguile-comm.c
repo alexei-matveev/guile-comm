@@ -187,6 +187,8 @@ SCM comm_barrier (SCM world) // MPI_Barrier (world, ...)
     return scm_from_int (ierr);
 }
 
+#if 0
+
 SCM comm_send_recv (SCM world, SCM dst, SCM src, SCM tag, SCM data) // MPI_Sendrecv, note argument order
 {
     // extract MPI_Comm, verifies the type:
@@ -210,6 +212,40 @@ SCM comm_send_recv (SCM world, SCM dst, SCM src, SCM tag, SCM data) // MPI_Sendr
 
     return scm_from_int (recvbuf);
 }
+
+#else
+
+SCM comm_send_recv (SCM world, SCM dst, SCM src, SCM tag, SCM obj) // MPI_Sendrecv, note argument order
+{
+    size_t max_len = MAX_BUF_LENGTH;
+
+    char sendbuf[MAX_BUF_LENGTH];
+    char recvbuf[MAX_BUF_LENGTH];
+
+    // extract MPI_Comm, verifies the type:
+    MPI_Comm comm = comm_t_comm (world);
+
+    int idst = scm_to_int (dst);
+    int isrc = scm_to_int (src);
+
+    // FIXME: the same tag for send and recv:
+    int itag = scm_to_int (tag);
+
+    // FIXME: buffer may be too small:
+    size_t len = write_buf (obj, sendbuf, max_len);
+    assert(len<max_len);
+
+    MPI_Status stat;
+
+    int ierr = MPI_Sendrecv (&sendbuf, max_len, MPI_CHAR, idst, itag, \
+                             &recvbuf, max_len, MPI_CHAR, isrc, itag, \
+                             comm, &stat);
+    assert(MPI_SUCCESS==ierr);
+
+    return read_buf(recvbuf, max_len);
+}
+
+#endif
 
 //
 // Send as a procedure, receive as a function that returns
