@@ -203,6 +203,7 @@ SCM comm_send_recv (SCM world, SCM dst, SCM src, SCM tag, SCM data) // MPI_Sendr
     return scm_from_int (recvbuf);
 }
 
+/*
 //
 // Ugly abstraction:
 //
@@ -242,6 +243,7 @@ SCM comm_recv (SCM world, SCM source, SCM tag) // MPI_Recv
 
     return scm_from_int (idata);
 }
+*/
 
 SCM comm_split (SCM world, SCM color) // MPI_Comm_split (world, color, ...)
 {
@@ -313,8 +315,10 @@ void init_guile_comm (void)
     scm_c_define_gsubr ("comm-size", 1, 0, 0, comm_size);
     scm_c_define_gsubr ("comm-barrier", 1, 0, 0, comm_barrier);
     scm_c_define_gsubr ("comm-send-recv", 5, 0, 0, comm_send_recv);
+    /*
     scm_c_define_gsubr ("comm-send", 4, 0, 0, comm_send);
     scm_c_define_gsubr ("comm-recv", 3, 0, 0, comm_recv);
+    */
     scm_c_define_gsubr ("comm-split", 2, 0, 0, comm_split);
     scm_c_define_gsubr ("comm-free", 1, 0, 0, comm_free);
     scm_c_define_gsubr ("comm-set-name", 2, 0, 0, comm_set_name);
