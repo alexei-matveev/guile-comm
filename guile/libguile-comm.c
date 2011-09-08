@@ -50,17 +50,13 @@ SCM comm_t_make (const MPI_Comm comm) // comm-init wants to return MPI_COMM_WORL
 //
 // This converts a comm_t SMOB to an MPI_Comm:
 //
+#define COMM_T_COMM(smob) (((struct comm_t *) SCM_SMOB_DATA (smob))->comm)
 static
 MPI_Comm comm_t_comm (const SCM smob)
 {
     scm_assert_smob_type (comm_t_tag, smob);
 
-    struct comm_t *ptr = (struct comm_t *) SCM_SMOB_DATA (smob);
-
-    // there is only one so far:
-    // NO MORE: assert(MPI_COMM_WORLD==ptr->comm);
-
-    return ptr->comm;
+    return COMM_T_COMM(smob);
 }
 
 //
