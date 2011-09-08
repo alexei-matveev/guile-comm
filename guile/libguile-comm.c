@@ -6,7 +6,10 @@
 // example parallel code:
 #include "pi.h"
 
+#ifdef NOT_NOW
+#else
 #define MAX_BUF_LENGTH 512
+#endif
 
 static SCM comm_t_make (const MPI_Comm comm);
 static MPI_Comm comm_t_comm (const SCM smob);
@@ -187,7 +190,7 @@ SCM comm_barrier (SCM world) // MPI_Barrier (world, ...)
     return scm_from_int (ierr);
 }
 
-#if 0
+#ifdef NOT_NOW
 
 SCM comm_send_recv (SCM world, SCM dst, SCM src, SCM tag, SCM data) // MPI_Sendrecv, note argument order
 {
@@ -251,7 +254,7 @@ SCM comm_send_recv (SCM world, SCM dst, SCM src, SCM tag, SCM obj) // MPI_Sendre
 // Send as a procedure, receive as a function that returns
 // arbitrary types unrelated to input is an ugly abstraction:
 //
-#if 0
+#ifdef NOT_NOW
 SCM comm_send (SCM world, SCM dest, SCM tag, SCM data) // MPI_Send, note argument order
 {
     // extract MPI_Comm, verifies the type:
