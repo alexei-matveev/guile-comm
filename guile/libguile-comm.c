@@ -6,11 +6,16 @@
 // example parallel code:
 #include "pi.h"
 
+#define MAX_BUF_LENGTH 512
+
 static SCM comm_t_make (const MPI_Comm comm);
 static MPI_Comm comm_t_comm (const SCM smob);
 
 static SCM object_to_string (SCM obj);
 static SCM string_to_object (SCM obj);
+
+static size_t write_buf (SCM obj, char *buf, size_t max_len);
+static SCM read_buf (const char *buf, size_t max_len);
 
 //
 // Guile identifies SMOB (small objects) types by tags:
@@ -246,25 +251,19 @@ SCM comm_recv (SCM world, SCM source, SCM tag) // MPI_Recv
 }
 #else
 
-#define MAX_BUF_LENGTH 512
-
 SCM comm_send (SCM world, SCM dst, SCM tag, SCM obj)
 {
+    size_t max_len = MAX_BUF_LENGTH;
+    char buf[MAX_BUF_LENGTH];
+
     // extract MPI_Comm, verifies the type:
     MPI_Comm comm = comm_t_comm (world);
 
     int idst = scm_to_int (dst);
     int itag = scm_to_int (tag);
 
-    char buf[MAX_BUF_LENGTH];
-    size_t max_len = MAX_BUF_LENGTH;
-
-    SCM str = object_to_string (obj);
-
-    size_t len = scm_to_locale_stringbuf (str, buf, max_len);
+    size_t len = write_buf (obj, buf, max_len);
     assert(len<max_len);
-
-    buf[len] = '\0';
 
     // printf("SEND:%s\n", buf);
 
@@ -276,14 +275,15 @@ SCM comm_send (SCM world, SCM dst, SCM tag, SCM obj)
 
 SCM comm_recv (SCM world, SCM src, SCM tag)
 {
+    size_t max_len = MAX_BUF_LENGTH;
+    char buf[MAX_BUF_LENGTH];
+
     // extract MPI_Comm, verifies the type:
     MPI_Comm comm = comm_t_comm (world);
 
     int isrc = scm_to_int (src);
     int itag = scm_to_int (tag);
 
-    size_t max_len = MAX_BUF_LENGTH;
-    char buf[MAX_BUF_LENGTH];
     MPI_Status stat;
 
     int ierr = MPI_Recv (buf, max_len, MPI_CHAR, isrc, itag, comm, &stat);
@@ -291,11 +291,7 @@ SCM comm_recv (SCM world, SCM src, SCM tag)
 
     // printf("RECV:%s\n", buf);
 
-    SCM str = scm_from_locale_string (buf);
-
-    SCM obj = string_to_object (str);
-
-    return obj;
+    return read_buf(buf, max_len);
 }
 
 #endif
@@ -355,6 +351,9 @@ SCM comm_pi (SCM world, SCM n)
     return scm_from_double (dbl);
 }
 
+//
+// These write/read scheme objects to scheme strings:
+//
 static
 SCM string_to_object (SCM str)
 {
@@ -395,6 +394,34 @@ SCM object_to_string (SCM obj) // variant 2
 }
 
 #endif
+
+//
+// These serialize/deserialize objects to char buffers
+//
+// FIXME: both sending/receiving and serializing/deserializing
+//        of variable buffer sizes.
+//
+static
+size_t write_buf (SCM obj, char *buf, size_t max_len)
+{
+    SCM str = object_to_string (obj);
+
+    size_t len = scm_to_locale_stringbuf (str, buf, max_len);
+    assert(len<max_len);
+
+    // FIXME: off-by-one?
+    buf[len] = '\0';
+
+    return len;
+}
+
+static
+SCM read_buf (const char *buf, size_t max_len)
+{
+    SCM str = scm_from_locale_string (buf);
+
+    return string_to_object (str);
+}
 
 void init_guile_comm (void)
 {
