@@ -1,6 +1,7 @@
 #include <libguile.h>
 #include <mpi.h>
 #include <assert.h>
+// #include <stdio.h>
 
 // example parallel code:
 #include "pi.h"
@@ -205,10 +206,11 @@ SCM comm_send_recv (SCM world, SCM dst, SCM src, SCM tag, SCM data) // MPI_Sendr
     return scm_from_int (recvbuf);
 }
 
-/*
 //
-// Ugly abstraction:
+// Send as a procedure, receive as a function that returns
+// arbitrary types unrelated to input is an ugly abstraction:
 //
+#if 0
 SCM comm_send (SCM world, SCM dest, SCM tag, SCM data) // MPI_Send, note argument order
 {
     // extract MPI_Comm, verifies the type:
@@ -226,9 +228,6 @@ SCM comm_send (SCM world, SCM dest, SCM tag, SCM data) // MPI_Send, note argumen
     return scm_from_int (ierr);
 }
 
-//
-// Ugly abstraction:
-//
 SCM comm_recv (SCM world, SCM source, SCM tag) // MPI_Recv
 {
     // extract MPI_Comm, verifies the type:
@@ -245,7 +244,61 @@ SCM comm_recv (SCM world, SCM source, SCM tag) // MPI_Recv
 
     return scm_from_int (idata);
 }
-*/
+#else
+
+#define MAX_BUF_LENGTH 512
+
+SCM comm_send (SCM world, SCM dst, SCM tag, SCM obj)
+{
+    // extract MPI_Comm, verifies the type:
+    MPI_Comm comm = comm_t_comm (world);
+
+    int idst = scm_to_int (dst);
+    int itag = scm_to_int (tag);
+
+    char buf[MAX_BUF_LENGTH];
+    size_t max_len = MAX_BUF_LENGTH;
+
+    SCM str = object_to_string (obj);
+
+    size_t len = scm_to_locale_stringbuf (str, buf, max_len);
+    assert(len<max_len);
+
+    buf[len] = '\0';
+
+    // printf("SEND:%s\n", buf);
+
+    int ierr = MPI_Send (buf, max_len, MPI_CHAR, idst, itag, comm);
+    assert(MPI_SUCCESS==ierr);
+
+    return scm_from_int (ierr);
+}
+
+SCM comm_recv (SCM world, SCM src, SCM tag)
+{
+    // extract MPI_Comm, verifies the type:
+    MPI_Comm comm = comm_t_comm (world);
+
+    int isrc = scm_to_int (src);
+    int itag = scm_to_int (tag);
+
+    size_t max_len = MAX_BUF_LENGTH;
+    char buf[MAX_BUF_LENGTH];
+    MPI_Status stat;
+
+    int ierr = MPI_Recv (buf, max_len, MPI_CHAR, isrc, itag, comm, &stat);
+    assert(MPI_SUCCESS==ierr);
+
+    // printf("RECV:%s\n", buf);
+
+    SCM str = scm_from_locale_string (buf);
+
+    SCM obj = string_to_object (str);
+
+    return obj;
+}
+
+#endif
 
 SCM comm_split (SCM world, SCM color) // MPI_Comm_split (world, color, ...)
 {
@@ -358,10 +411,10 @@ void init_guile_comm (void)
     scm_c_define_gsubr ("comm-size", 1, 0, 0, comm_size);
     scm_c_define_gsubr ("comm-barrier", 1, 0, 0, comm_barrier);
     scm_c_define_gsubr ("comm-send-recv", 5, 0, 0, comm_send_recv);
-    /*
+
     scm_c_define_gsubr ("comm-send", 4, 0, 0, comm_send);
     scm_c_define_gsubr ("comm-recv", 3, 0, 0, comm_recv);
-    */
+
     scm_c_define_gsubr ("comm-split", 2, 0, 0, comm_split);
     scm_c_define_gsubr ("comm-free", 1, 0, 0, comm_free);
     scm_c_define_gsubr ("comm-set-name", 2, 0, 0, comm_set_name);
