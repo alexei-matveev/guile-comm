@@ -236,16 +236,23 @@ SCM comm_send_recv (SCM world, SCM dst, SCM src, SCM tag, SCM obj) // MPI_Sendre
 
     // FIXME: buffer may be too small:
     size_t len = write_buf (obj, sendbuf, max_len);
-    assert (len<max_len);
+    assert (len <= max_len); // here: <=
 
     MPI_Status stat;
 
-    int ierr = MPI_Sendrecv (&sendbuf, max_len, MPI_CHAR, idst, itag, \
+    // send just enough elements:
+    int ierr = MPI_Sendrecv (&sendbuf,     len, MPI_CHAR, idst, itag, \
                              &recvbuf, max_len, MPI_CHAR, isrc, itag, \
                              comm, &stat);
     assert (MPI_SUCCESS==ierr);
 
-    return read_buf(recvbuf, max_len);
+    // get the size of the received data:
+    int ilen;
+    ierr = MPI_Get_count(&stat, MPI_CHAR, &ilen);
+    assert (MPI_SUCCESS==ierr);
+    assert (ilen <= max_len); // redundant, as MPI would fail
+
+    return read_buf(recvbuf, ilen);
 }
 
 #endif
@@ -306,8 +313,9 @@ SCM comm_send (SCM world, SCM dst, SCM tag, SCM obj)
 
     // printf("SEND:%s\n", buf);
 
-    int ierr = MPI_Send (buf, max_len, MPI_CHAR, idst, itag, comm);
-    assert(MPI_SUCCESS==ierr);
+    // send just enough elements:
+    int ierr = MPI_Send (buf, len, MPI_CHAR, idst, itag, comm);
+    assert (MPI_SUCCESS==ierr);
 
     return scm_from_int (ierr);
 }
@@ -330,7 +338,12 @@ SCM comm_recv (SCM world, SCM src, SCM tag)
 
     // printf("RECV:%s\n", buf);
 
-    return read_buf(buf, max_len);
+    // get the size of the received data:
+    int ilen;
+    ierr = MPI_Get_count(&stat, MPI_CHAR, &ilen);
+    assert (MPI_SUCCESS==ierr);
+
+    return read_buf(buf, ilen);
 }
 
 #endif
@@ -446,17 +459,23 @@ size_t write_buf (SCM obj, char *buf, size_t max_len)
     SCM str = object_to_string (obj);
 
     size_t len = scm_to_locale_stringbuf (str, buf, max_len);
-    assert (len<max_len);
 
-    // FIXME: off-by-one?
+    // NOTE: scm_to_locale_stringbuf() does not put terminating \0
+    //       into the character buffer. For printing, and 
+    //       later reading in read_buf a \0 must be there:
+    assert (len < max_len); // yes, not <=
+
+    // buf[len] = '!';
+    // printf("write_buf:%s\n", buf);
     buf[len] = '\0';
 
-    return len;
+    return len + 1;
 }
 
 static
 SCM read_buf (const char *buf, size_t max_len)
 {
+    // we expect here a \0-terminated string:
     SCM str = scm_from_locale_string (buf);
 
     return string_to_object (str);
