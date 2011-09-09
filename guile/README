@@ -1,0 +1,9 @@
+This is a guile interpreter with an extension that allows manipulating process
+groups (MPI communicators) and basic inter-process communication.
+
+    cd guile
+    make
+    mpirun -np 4 $PWD/guile-mpi -s $PWD/comm.scm
+
+Here $PWD might be necessary if mpirun does not respect CWD when spawning
+processes.
