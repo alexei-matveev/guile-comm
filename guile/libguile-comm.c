@@ -85,13 +85,13 @@ comm_t_print (SCM world, SCM port, scm_print_state *pstate)
     MPI_Comm comm = comm_t_comm (world);
 
     // there is only one:
-    // NO MORE: assert(MPI_COMM_WORLD==comm);
+    // NO MORE: assert (MPI_COMM_WORLD==comm);
 
     // some communicators have names associated with them:
     char name[MPI_MAX_OBJECT_NAME];
     int len;
 
-    int ierr = MPI_Comm_get_name(comm, name, &len);
+    int ierr = MPI_Comm_get_name (comm, name, &len);
     assert (MPI_SUCCESS==ierr);
 
     scm_puts ("#<comm ", port);
@@ -121,7 +121,7 @@ SCM comm_set_name (SCM world, SCM name)
 
     cname[len] = '\0';
 
-    int ierr = MPI_Comm_set_name(comm, cname);
+    int ierr = MPI_Comm_set_name (comm, cname);
     assert (MPI_SUCCESS==ierr);
 
     return scm_from_int (len);
@@ -142,7 +142,7 @@ SCM comm_init (SCM args) // MPI_Init
     assert (MPI_SUCCESS==ierr);
 
     // return scm_from_int (ierr);
-    return comm_t_make(MPI_COMM_WORLD);
+    return comm_t_make (MPI_COMM_WORLD);
 }
 
 SCM comm_finalize (void) // MPI_Finalize
@@ -248,11 +248,11 @@ SCM comm_send_recv (SCM world, SCM dst, SCM src, SCM tag, SCM obj) // MPI_Sendre
 
     // get the size of the received data:
     int ilen;
-    ierr = MPI_Get_count(&stat, MPI_CHAR, &ilen);
+    ierr = MPI_Get_count (&stat, MPI_CHAR, &ilen);
     assert (MPI_SUCCESS==ierr);
     assert (ilen <= max_len); // redundant, as MPI would fail
 
-    return read_buf(recvbuf, ilen);
+    return read_buf (recvbuf, ilen);
 }
 
 #endif
@@ -311,7 +311,7 @@ SCM comm_send (SCM world, SCM dst, SCM tag, SCM obj)
     size_t len = write_buf (obj, buf, max_len);
     assert (len<max_len);
 
-    // printf("SEND:%s\n", buf);
+    // printf ("SEND:%s\n", buf);
 
     // send just enough elements:
     int ierr = MPI_Send (buf, len, MPI_CHAR, idst, itag, comm);
@@ -336,14 +336,14 @@ SCM comm_recv (SCM world, SCM src, SCM tag)
     int ierr = MPI_Recv (buf, max_len, MPI_CHAR, isrc, itag, comm, &stat);
     assert (MPI_SUCCESS==ierr);
 
-    // printf("RECV:%s\n", buf);
+    // printf ("RECV:%s\n", buf);
 
     // get the size of the received data:
     int ilen;
-    ierr = MPI_Get_count(&stat, MPI_CHAR, &ilen);
+    ierr = MPI_Get_count (&stat, MPI_CHAR, &ilen);
     assert (MPI_SUCCESS==ierr);
 
-    return read_buf(buf, ilen);
+    return read_buf (buf, ilen);
 }
 
 #endif
@@ -369,7 +369,7 @@ SCM comm_split (SCM world, SCM color) // MPI_Comm_split (world, color, ...)
     ierr = MPI_Comm_split (comm, icolor, key, &country);
     assert (MPI_SUCCESS==ierr);
 
-    return comm_t_make(country);
+    return comm_t_make (country);
 }
 
 //
@@ -460,13 +460,13 @@ size_t write_buf (SCM obj, char *buf, size_t max_len)
 
     size_t len = scm_to_locale_stringbuf (str, buf, max_len);
 
-    // NOTE: scm_to_locale_stringbuf() does not put terminating \0
+    // NOTE: scm_to_locale_stringbuf () does not put terminating \0
     //       into the character buffer. For printing, and 
     //       later reading in read_buf a \0 must be there:
     assert (len < max_len); // yes, not <=
 
     // buf[len] = '!';
-    // printf("write_buf:%s\n", buf);
+    // printf ("write_buf:%s\n", buf);
     buf[len] = '\0';
 
     return len + 1;
