@@ -92,7 +92,7 @@ comm_t_print (SCM world, SCM port, scm_print_state *pstate)
     int len;
 
     int ierr = MPI_Comm_get_name(comm, name, &len);
-    assert(MPI_SUCCESS==ierr);
+    assert (MPI_SUCCESS==ierr);
 
     scm_puts ("#<comm ", port);
     scm_puts (name, port);
@@ -122,7 +122,7 @@ SCM comm_set_name (SCM world, SCM name)
     cname[len] = 0;
 
     int ierr = MPI_Comm_set_name(comm, cname);
-    assert(MPI_SUCCESS==ierr);
+    assert (MPI_SUCCESS==ierr);
 
     return scm_from_int (len);
 }
@@ -139,7 +139,7 @@ SCM comm_init (SCM args) // MPI_Init
         ;
 
     int ierr = MPI_Init (&argc, &argv);
-    assert(MPI_SUCCESS==ierr);
+    assert (MPI_SUCCESS==ierr);
 
     // return scm_from_int (ierr);
     return comm_t_make(MPI_COMM_WORLD);
@@ -148,7 +148,7 @@ SCM comm_init (SCM args) // MPI_Init
 SCM comm_finalize (void) // MPI_Finalize
 {
     int ierr = MPI_Finalize ();
-    assert(MPI_SUCCESS==ierr);
+    assert (MPI_SUCCESS==ierr);
 
     return scm_from_int (ierr);
 }
@@ -161,7 +161,7 @@ SCM comm_rank (SCM world) // MPI_Comm_rank (world, ...)
     MPI_Comm comm = comm_t_comm (world);
 
     int ierr = MPI_Comm_rank (comm, &rank);
-    assert(MPI_SUCCESS==ierr);
+    assert (MPI_SUCCESS==ierr);
 
     return scm_from_int (rank);
 }
@@ -174,7 +174,7 @@ SCM comm_size (SCM world) // MPI_Comm_size (world, ...)
     MPI_Comm comm = comm_t_comm (world);
 
     int ierr = MPI_Comm_size (comm, &size);
-    assert(MPI_SUCCESS==ierr);
+    assert (MPI_SUCCESS==ierr);
 
     return scm_from_int (size);
 }
@@ -185,7 +185,7 @@ SCM comm_barrier (SCM world) // MPI_Barrier (world, ...)
     MPI_Comm comm = comm_t_comm (world);
 
     int ierr = MPI_Barrier (comm);
-    assert(MPI_SUCCESS==ierr);
+    assert (MPI_SUCCESS==ierr);
 
     return scm_from_int (ierr);
 }
@@ -211,7 +211,7 @@ SCM comm_send_recv (SCM world, SCM dst, SCM src, SCM tag, SCM data) // MPI_Sendr
     int ierr = MPI_Sendrecv (&sendbuf, 1, MPI_INT, idst, itag, \
                              &recvbuf, 1, MPI_INT, isrc, itag, \
                              comm, &stat);
-    assert(MPI_SUCCESS==ierr);
+    assert (MPI_SUCCESS==ierr);
 
     return scm_from_int (recvbuf);
 }
@@ -236,14 +236,14 @@ SCM comm_send_recv (SCM world, SCM dst, SCM src, SCM tag, SCM obj) // MPI_Sendre
 
     // FIXME: buffer may be too small:
     size_t len = write_buf (obj, sendbuf, max_len);
-    assert(len<max_len);
+    assert (len<max_len);
 
     MPI_Status stat;
 
     int ierr = MPI_Sendrecv (&sendbuf, max_len, MPI_CHAR, idst, itag, \
                              &recvbuf, max_len, MPI_CHAR, isrc, itag, \
                              comm, &stat);
-    assert(MPI_SUCCESS==ierr);
+    assert (MPI_SUCCESS==ierr);
 
     return read_buf(recvbuf, max_len);
 }
@@ -267,7 +267,7 @@ SCM comm_send (SCM world, SCM dest, SCM tag, SCM data) // MPI_Send, note argumen
     int idata = scm_to_int (data);
 
     int ierr = MPI_Send (&idata, 1, MPI_INT, idest, itag, comm);
-    assert(MPI_SUCCESS==ierr);
+    assert (MPI_SUCCESS==ierr);
 
     return scm_from_int (ierr);
 }
@@ -284,7 +284,7 @@ SCM comm_recv (SCM world, SCM source, SCM tag) // MPI_Recv
     int idata;
     MPI_Status stat;
     int ierr = MPI_Recv (&idata, 1, MPI_INT, isource, itag, comm, &stat);
-    assert(MPI_SUCCESS==ierr);
+    assert (MPI_SUCCESS==ierr);
 
     return scm_from_int (idata);
 }
@@ -302,7 +302,7 @@ SCM comm_send (SCM world, SCM dst, SCM tag, SCM obj)
     int itag = scm_to_int (tag);
 
     size_t len = write_buf (obj, buf, max_len);
-    assert(len<max_len);
+    assert (len<max_len);
 
     // printf("SEND:%s\n", buf);
 
@@ -326,7 +326,7 @@ SCM comm_recv (SCM world, SCM src, SCM tag)
     MPI_Status stat;
 
     int ierr = MPI_Recv (buf, max_len, MPI_CHAR, isrc, itag, comm, &stat);
-    assert(MPI_SUCCESS==ierr);
+    assert (MPI_SUCCESS==ierr);
 
     // printf("RECV:%s\n", buf);
 
@@ -349,12 +349,12 @@ SCM comm_split (SCM world, SCM color) // MPI_Comm_split (world, color, ...)
     // use world ranks for that:
     int key;
     ierr = MPI_Comm_rank (comm, &key);
-    assert(MPI_SUCCESS==ierr);
+    assert (MPI_SUCCESS==ierr);
 
     MPI_Comm country; // part of the world of the same color
 
     ierr = MPI_Comm_split (comm, icolor, key, &country);
-    assert(MPI_SUCCESS==ierr);
+    assert (MPI_SUCCESS==ierr);
 
     return comm_t_make(country);
 }
@@ -369,7 +369,7 @@ SCM comm_free (SCM world) // MPI_Comm_free
     MPI_Comm comm = comm_t_comm (world);
 
     int ierr = MPI_Comm_free (&comm);
-    assert(MPI_SUCCESS==ierr);
+    assert (MPI_SUCCESS==ierr);
 
     return scm_from_int (ierr);
 }
@@ -446,7 +446,7 @@ size_t write_buf (SCM obj, char *buf, size_t max_len)
     SCM str = object_to_string (obj);
 
     size_t len = scm_to_locale_stringbuf (str, buf, max_len);
-    assert(len<max_len);
+    assert (len<max_len);
 
     // FIXME: off-by-one?
     buf[len] = '\0';
