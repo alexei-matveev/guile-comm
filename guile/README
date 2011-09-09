@@ -3,6 +3,15 @@ groups (MPI communicators) and basic inter-process communication.
 
     cd guile
     make
+    ./guile-mpi
+
+.. and get a Scheme interpreter, try
+
+    guile> (load "comm.scm")
+
+MPI does not handle STDIN multiplexing so for parallel
+runs execute it in patch mode:
+
     mpirun -np 4 $PWD/guile-mpi -s $PWD/comm.scm
 
 Here $PWD might be necessary if mpirun does not respect CWD when spawning
