@@ -119,7 +119,7 @@ SCM comm_set_name (SCM world, SCM name)
     if ( len > MPI_MAX_OBJECT_NAME )
         len = MPI_MAX_OBJECT_NAME;
 
-    cname[len] = 0;
+    cname[len] = '\0';
 
     int ierr = MPI_Comm_set_name(comm, cname);
     assert (MPI_SUCCESS==ierr);
