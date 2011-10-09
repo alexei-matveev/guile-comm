@@ -23,7 +23,7 @@ static SCM read_buf (const char *buf, size_t max_len);
 //
 // Try exposing MPI_COMM_WORLD:
 //
-static SCM comm_world;
+// static SCM comm_world;
 
 //
 // Set a name on a communicator:
@@ -427,5 +427,5 @@ void init_guile_comm (void)
     // scm_c_define_gsubr ("string-to-object", 1, 0, 0, string_to_object);
 
     // constants and variables:
-    comm_world = scm_permanent_object (scm_c_define ("comm-world", SCM_FROM_COMM (MPI_COMM_WORLD)));
+    // comm_world = scm_permanent_object (scm_c_define ("comm-world", SCM_FROM_COMM (MPI_COMM_WORLD)));
 }
