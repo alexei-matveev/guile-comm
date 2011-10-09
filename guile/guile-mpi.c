@@ -1,6 +1,6 @@
 #include <stdlib.h>
 #include <libguile.h>
-// #include <mpi.h> /* only for MPI_Initialized */
+#include <mpi.h>
 #include "libguile-comm.h"
 
 static void

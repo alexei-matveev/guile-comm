@@ -3,8 +3,8 @@
 #include <assert.h>
 // #include <stdio.h>
 
-// wrappers for communicator type:
-#include "libguile-comm-smob.h"
+// also declares wrappers for communicator smob:
+#include "libguile-comm.h"
 
 // example parallel code:
 #include "pi.h"

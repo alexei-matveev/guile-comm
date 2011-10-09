@@ -1,7 +1,7 @@
 #include <libguile.h>
 #include <mpi.h>
 
-#include "libguile-comm-fint.h"
+#include "libguile-comm.h"
 
 //
 // Here we use the one-to-one relation between MPI_Comm instances

@@ -2,7 +2,9 @@
 #include <mpi.h>
 #include <assert.h>
 
-#include "libguile-comm-smob.h"
+#include "libguile-comm.h"
+
+#define SCM_TO_COMM_UNSAFE(smob) (((struct comm_t *) SCM_SMOB_DATA (smob))->comm)
 
 //
 // Guile identifies SMOB (small objects) types by tags:
