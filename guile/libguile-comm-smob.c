@@ -60,7 +60,7 @@ static int
 comm_t_print (SCM world, SCM port, scm_print_state *pstate)
 {
     // extract MPI_Comm, verifies the type:
-    MPI_Comm comm = SCM_TO_COMM (world);
+    MPI_Comm comm = scm_to_comm (world);
 
     // there is only one:
     // NO MORE: assert (MPI_COMM_WORLD==comm);

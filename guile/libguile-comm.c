@@ -31,7 +31,7 @@ static SCM read_buf (const char *buf, size_t max_len);
 SCM comm_set_name (SCM world, SCM name)
 {
     // extract MPI_Comm, verifies the type:
-    MPI_Comm comm = SCM_TO_COMM (world);
+    MPI_Comm comm = scm_to_comm (world);
 
     // some communicators have names associated with them:
     char cname[MPI_MAX_OBJECT_NAME];
@@ -65,7 +65,7 @@ SCM comm_init (SCM args) // MPI_Init
     assert (MPI_SUCCESS==ierr);
 
     // return scm_from_int (ierr);
-    return SCM_FROM_COMM (MPI_COMM_WORLD);
+    return scm_from_comm (MPI_COMM_WORLD);
 }
 
 SCM comm_finalize (void) // MPI_Finalize
@@ -81,7 +81,7 @@ SCM comm_rank (SCM world) // MPI_Comm_rank (world, ...)
     int rank;
 
     // extract MPI_Comm, verifies the type:
-    MPI_Comm comm = SCM_TO_COMM (world);
+    MPI_Comm comm = scm_to_comm (world);
 
     int ierr = MPI_Comm_rank (comm, &rank);
     assert (MPI_SUCCESS==ierr);
@@ -94,7 +94,7 @@ SCM comm_size (SCM world) // MPI_Comm_size (world, ...)
     int size;
 
     // extract MPI_Comm, verifies the type:
-    MPI_Comm comm = SCM_TO_COMM (world);
+    MPI_Comm comm = scm_to_comm (world);
 
     int ierr = MPI_Comm_size (comm, &size);
     assert (MPI_SUCCESS==ierr);
@@ -105,7 +105,7 @@ SCM comm_size (SCM world) // MPI_Comm_size (world, ...)
 SCM comm_barrier (SCM world) // MPI_Barrier (world, ...)
 {
     // extract MPI_Comm, verifies the type:
-    MPI_Comm comm = SCM_TO_COMM (world);
+    MPI_Comm comm = scm_to_comm (world);
 
     int ierr = MPI_Barrier (comm);
     assert (MPI_SUCCESS==ierr);
@@ -118,7 +118,7 @@ SCM comm_barrier (SCM world) // MPI_Barrier (world, ...)
 SCM comm_send_recv (SCM world, SCM dst, SCM src, SCM tag, SCM data) // MPI_Sendrecv, note argument order
 {
     // extract MPI_Comm, verifies the type:
-    MPI_Comm comm = SCM_TO_COMM (world);
+    MPI_Comm comm = scm_to_comm (world);
 
     int idst = scm_to_int (dst);
     int isrc = scm_to_int (src);
@@ -149,7 +149,7 @@ SCM comm_send_recv (SCM world, SCM dst, SCM src, SCM tag, SCM obj) // MPI_Sendre
     char recvbuf[MAX_BUF_LENGTH];
 
     // extract MPI_Comm, verifies the type:
-    MPI_Comm comm = SCM_TO_COMM (world);
+    MPI_Comm comm = scm_to_comm (world);
 
     int idst = scm_to_int (dst);
     int isrc = scm_to_int (src);
@@ -188,7 +188,7 @@ SCM comm_send_recv (SCM world, SCM dst, SCM src, SCM tag, SCM obj) // MPI_Sendre
 SCM comm_send (SCM world, SCM dest, SCM tag, SCM data) // MPI_Send, note argument order
 {
     // extract MPI_Comm, verifies the type:
-    MPI_Comm comm = SCM_TO_COMM (world);
+    MPI_Comm comm = scm_to_comm (world);
 
     int idest = scm_to_int (dest);
     int itag = scm_to_int (tag);
@@ -205,7 +205,7 @@ SCM comm_send (SCM world, SCM dest, SCM tag, SCM data) // MPI_Send, note argumen
 SCM comm_recv (SCM world, SCM source, SCM tag) // MPI_Recv
 {
     // extract MPI_Comm, verifies the type:
-    MPI_Comm comm = SCM_TO_COMM (world);
+    MPI_Comm comm = scm_to_comm (world);
 
     int isource = scm_to_int (source);
     int itag = scm_to_int (tag);
@@ -226,7 +226,7 @@ SCM comm_send (SCM world, SCM dst, SCM tag, SCM obj)
     char buf[MAX_BUF_LENGTH];
 
     // extract MPI_Comm, verifies the type:
-    MPI_Comm comm = SCM_TO_COMM (world);
+    MPI_Comm comm = scm_to_comm (world);
 
     int idst = scm_to_int (dst);
     int itag = scm_to_int (tag);
@@ -249,7 +249,7 @@ SCM comm_recv (SCM world, SCM src, SCM tag)
     char buf[MAX_BUF_LENGTH];
 
     // extract MPI_Comm, verifies the type:
-    MPI_Comm comm = SCM_TO_COMM (world);
+    MPI_Comm comm = scm_to_comm (world);
 
     int isrc = scm_to_int (src);
     int itag = scm_to_int (tag);
@@ -276,7 +276,7 @@ SCM comm_split (SCM world, SCM color) // MPI_Comm_split (world, color, ...)
     int ierr;
 
     // extract MPI_Comm, verifies the type:
-    MPI_Comm comm = SCM_TO_COMM (world);
+    MPI_Comm comm = scm_to_comm (world);
 
     // color will define the coutries:
     int icolor = scm_to_int (color);
@@ -292,7 +292,7 @@ SCM comm_split (SCM world, SCM color) // MPI_Comm_split (world, color, ...)
     ierr = MPI_Comm_split (comm, icolor, key, &country);
     assert (MPI_SUCCESS==ierr);
 
-    return SCM_FROM_COMM (country);
+    return scm_from_comm (country);
 }
 
 //
@@ -302,7 +302,7 @@ SCM comm_split (SCM world, SCM color) // MPI_Comm_split (world, color, ...)
 SCM comm_free (SCM world) // MPI_Comm_free
 {
     // extract MPI_Comm, verifies the type:
-    MPI_Comm comm = SCM_TO_COMM (world);
+    MPI_Comm comm = scm_to_comm (world);
 
     int ierr = MPI_Comm_free (&comm);
     assert (MPI_SUCCESS==ierr);
@@ -316,7 +316,7 @@ SCM comm_free (SCM world) // MPI_Comm_free
 SCM comm_pi (SCM world, SCM n)
 {
     // extract MPI_Comm, verifies the type:
-    MPI_Comm comm = SCM_TO_COMM (world);
+    MPI_Comm comm = scm_to_comm (world);
 
     int N = scm_to_int (n);
 
@@ -427,5 +427,5 @@ void init_guile_comm (void)
     // scm_c_define_gsubr ("string-to-object", 1, 0, 0, string_to_object);
 
     // constants and variables:
-    // comm_world = scm_permanent_object (scm_c_define ("comm-world", SCM_FROM_COMM (MPI_COMM_WORLD)));
+    // comm_world = scm_permanent_object (scm_c_define ("comm-world", scm_from_comm (MPI_COMM_WORLD)));
 }
