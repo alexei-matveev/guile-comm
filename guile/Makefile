@@ -13,6 +13,10 @@ ifndef RANLIB
     AR = ar
     CFLAGS = -Wall
 endif
+
+# some spell them as CCFLAGS:
+CFLAGS += $(CCFLAGS)
+
 LIBS=`pkg-config --libs guile-1.8`
 
 all: guile-mpi
