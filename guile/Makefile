@@ -19,7 +19,7 @@ CFLAGS += $(CCFLAGS)
 
 LIBS=`pkg-config --libs guile-1.8`
 
-all: guile-mpi
+all: guile-comm
 
 libguile-comm-impl.o = libguile-comm-fint.o
 #ibguile-comm-impl.o = libguile-comm-smob.o
@@ -28,7 +28,7 @@ libguile-comm.a: $(libguile-comm-impl.o) libguile-comm.o pi.o
 	$(AR) ruv $@  $(^)
 	$(RANLIB) $@
 
-guile-mpi: guile-mpi.o libguile-comm.a
+guile-comm: guile-comm.o libguile-comm.a
 	$(CC) $(CFLAGS) -o $(@) $(^) $(LIBS)
 
 %.o: %.c
