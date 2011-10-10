@@ -1,5 +1,14 @@
 #include <stdlib.h>
 #include <libguile.h>
+#include <mpi.h>
+#include <assert.h>
+
+//
+// Here we assume that communicators are implemented
+// in fortran style as SCM integers, libguile-comm should
+// be consistent to interoperate:
+//
+#include "libguile-comm.h"
 
 // run paragauss by calling these in sequence:
 int qm_init(void);
@@ -32,6 +41,9 @@ guile_qm_finalize (const SCM world)
 static void
 guile_main (void *data, int argc, char **argv)
 {
+    // defines comm-* gsubrs:
+    init_guile_comm();
+
     scm_c_define_gsubr ("qm-init", 0, 0, 0, guile_qm_init);
     scm_c_define_gsubr ("qm-run", 1, 0, 0, guile_qm_run);
     scm_c_define_gsubr ("qm-finalize", 1, 0, 0, guile_qm_finalize);
