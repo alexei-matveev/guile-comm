@@ -14,8 +14,8 @@
 static SCM object_to_string (SCM obj);
 static SCM string_to_object (SCM obj);
 
-static size_t write_buf (SCM obj, char *buf, size_t max_len);
-static SCM read_buf (const char *buf, size_t max_len);
+static char *scm_to_byte_string (SCM obj, size_t *lenp);
+static SCM scm_from_byte_string (const char *buf, size_t len);
 
 //
 // Try exposing MPI_COMM_WORLD:
@@ -119,9 +119,8 @@ guile_comm_barrier (SCM world) // MPI_Barrier (world, ...)
 SCM
 guile_comm_send_recv (SCM world, SCM dst, SCM src, SCM tag, SCM obj) // MPI_Sendrecv, note argument order
 {
-    size_t max_len = MAX_BUF_LENGTH;
-
-    char sendbuf[MAX_BUF_LENGTH];
+    size_t len;
+    char *sendbuf;
     char recvbuf[MAX_BUF_LENGTH];
 
     // extract MPI_Comm, verifies the type:
@@ -133,25 +132,27 @@ guile_comm_send_recv (SCM world, SCM dst, SCM src, SCM tag, SCM obj) // MPI_Send
     // FIXME: the same tag for send and recv:
     int itag = scm_to_int (tag);
 
-    // FIXME: buffer may be too small:
-    size_t len = write_buf (obj, sendbuf, max_len);
-    assert (len <= max_len); // here: <=
+    // searialize the object, dont forget to free() later:
+    sendbuf = scm_to_byte_string (obj, &len);
+    assert (len <= MAX_BUF_LENGTH); // here: <=
 
     MPI_Status stat;
 
     // send just enough elements:
-    int ierr = MPI_Sendrecv (&sendbuf,     len, MPI_CHAR, idst, itag, \
-                             &recvbuf, max_len, MPI_CHAR, isrc, itag, \
+    int ierr = MPI_Sendrecv ( sendbuf,            len, MPI_CHAR, idst, itag, \
+                             &recvbuf, MAX_BUF_LENGTH, MPI_CHAR, isrc, itag, \
                              comm, &stat);
     assert (MPI_SUCCESS==ierr);
+
+    free (sendbuf);
 
     // get the size of the received data:
     int ilen;
     ierr = MPI_Get_count (&stat, MPI_CHAR, &ilen);
     assert (MPI_SUCCESS==ierr);
-    assert (ilen <= max_len); // redundant, as MPI would fail
+    assert (ilen <= MAX_BUF_LENGTH); // redundant, as MPI would fail
 
-    return read_buf (recvbuf, ilen);
+    return scm_from_byte_string (recvbuf, ilen);
 }
 
 //
@@ -161,8 +162,8 @@ guile_comm_send_recv (SCM world, SCM dst, SCM src, SCM tag, SCM obj) // MPI_Send
 SCM
 guile_comm_send (SCM world, SCM dst, SCM tag, SCM obj)
 {
-    size_t max_len = MAX_BUF_LENGTH;
-    char buf[MAX_BUF_LENGTH];
+    size_t len;
+    char *buf;
 
     // extract MPI_Comm, verifies the type:
     MPI_Comm comm = scm_to_comm (world);
@@ -170,8 +171,9 @@ guile_comm_send (SCM world, SCM dst, SCM tag, SCM obj)
     int idst = scm_to_int (dst);
     int itag = scm_to_int (tag);
 
-    size_t len = write_buf (obj, buf, max_len);
-    assert (len<max_len);
+    // searialize the object, dont forget to free() later:
+    buf = scm_to_byte_string (obj, &len);
+    assert (len < MAX_BUF_LENGTH);
 
     // printf ("SEND:%s\n", buf);
 
@@ -179,13 +181,14 @@ guile_comm_send (SCM world, SCM dst, SCM tag, SCM obj)
     int ierr = MPI_Send (buf, len, MPI_CHAR, idst, itag, comm);
     assert (MPI_SUCCESS==ierr);
 
+    free (buf);
+
     return scm_from_int (ierr);
 }
 
 SCM
 guile_comm_recv (SCM world, SCM src, SCM tag)
 {
-    size_t max_len = MAX_BUF_LENGTH;
     char buf[MAX_BUF_LENGTH];
 
     // extract MPI_Comm, verifies the type:
@@ -196,7 +199,7 @@ guile_comm_recv (SCM world, SCM src, SCM tag)
 
     MPI_Status stat;
 
-    int ierr = MPI_Recv (buf, max_len, MPI_CHAR, isrc, itag, comm, &stat);
+    int ierr = MPI_Recv (buf, MAX_BUF_LENGTH, MPI_CHAR, isrc, itag, comm, &stat);
     assert (MPI_SUCCESS==ierr);
 
     // printf ("RECV:%s\n", buf);
@@ -206,7 +209,7 @@ guile_comm_recv (SCM world, SCM src, SCM tag)
     ierr = MPI_Get_count (&stat, MPI_CHAR, &ilen);
     assert (MPI_SUCCESS==ierr);
 
-    return read_buf (buf, ilen);
+    return scm_from_byte_string (buf, ilen);
 }
 
 SCM
@@ -296,30 +299,18 @@ object_to_string (SCM obj) // variant 2
 // FIXME: both sending/receiving and serializing/deserializing
 //        of variable buffer sizes.
 //
-static
-size_t write_buf (SCM obj, char *buf, size_t max_len)
+static char *
+scm_to_byte_string (SCM obj, size_t *lenp)
 {
     SCM str = object_to_string (obj);
 
-    size_t len = scm_to_locale_stringbuf (str, buf, max_len);
-
-    // NOTE: scm_to_locale_stringbuf () does not put terminating \0
-    //       into the character buffer. For printing, and 
-    //       later reading in read_buf a \0 must be there:
-    assert (len < max_len); // yes, not <=
-
-    // buf[len] = '!';
-    // printf ("write_buf:%s\n", buf);
-    buf[len] = '\0';
-
-    return len + 1;
+    return scm_to_locale_stringn (str, lenp);
 }
 
 static SCM
-read_buf (const char *buf, size_t max_len)
+scm_from_byte_string (const char *buf, size_t len)
 {
-    // we expect here a \0-terminated string:
-    SCM str = scm_from_locale_string (buf);
+    SCM str = scm_from_locale_stringn (buf, len);
 
     return string_to_object (str);
 }
