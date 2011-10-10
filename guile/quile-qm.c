@@ -2,28 +2,30 @@
 #include <libguile.h>
 
 // run paragauss by calling these in sequence:
-void qm_init(void);
-void qm_run(void);
-void qm_finalize(void);
+int qm_init(void);
+void qm_run(int world);
+void qm_finalize(int world);
 
 static SCM
-guile_qm_init(void)
+guile_qm_init (void)
 {
-    qm_init ();
+    int world = qm_init ();
+    return scm_from_int (world);
+}
+
+static SCM
+guile_qm_run (SCM world)
+{
+    int fworld = scm_to_int (world);
+    qm_run (fworld);
     return SCM_UNSPECIFIED;
 }
 
 static SCM
-guile_qm_run(void)
+guile_qm_finalize (const SCM world)
 {
-    qm_run ();
-    return SCM_UNSPECIFIED;
-}
-
-static SCM
-guile_qm_finalize(void)
-{
-    qm_finalize ();
+    int fworld = scm_to_int (world);
+    qm_finalize (fworld);
     return SCM_UNSPECIFIED;
 }
 
@@ -31,8 +33,8 @@ static void
 guile_main (void *data, int argc, char **argv)
 {
     scm_c_define_gsubr ("qm-init", 0, 0, 0, guile_qm_init);
-    scm_c_define_gsubr ("qm-run", 0, 0, 0, guile_qm_run);
-    scm_c_define_gsubr ("qm-finalize", 0, 0, 0, guile_qm_finalize);
+    scm_c_define_gsubr ("qm-run", 1, 0, 0, guile_qm_run);
+    scm_c_define_gsubr ("qm-finalize", 1, 0, 0, guile_qm_finalize);
 
     scm_shell (argc, argv); // never returns
 }
@@ -40,8 +42,6 @@ guile_main (void *data, int argc, char **argv)
 int
 main (int argc, char **argv)
 {
-  // run ();
-
   // void scm_boot_guile (int argc, char **argv, void (*main_func) (void *data, int argc, char **argv), void *data)
   scm_boot_guile (argc, argv, guile_main, 0);
   return 0; /* never reached */
