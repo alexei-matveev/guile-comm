@@ -1,8 +1,18 @@
 
+#
+# This file is supposed to set CC and more:
+#
 -include ../machine.inc
 
-# CC = mpicc
-CFLAGS=-Wall
+#
+# In case it does not:
+#
+ifndef RANLIB
+    RANLIB = ranlib
+    CC = mpicc
+    AR = ar
+    CFLAGS = -Wall
+endif
 LIBS=`pkg-config --libs guile-1.8`
 
 all: guile-mpi
