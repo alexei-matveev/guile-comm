@@ -270,8 +270,7 @@ guile_comm_pi (SCM world, SCM n)
 //
 // These write/read scheme objects to scheme strings:
 //
-static
-SCM
+static SCM
 string_to_object (SCM str)
 {
     SCM port = scm_open_input_string (str);
@@ -283,36 +282,13 @@ string_to_object (SCM str)
     return obj;
 }
 
-#if 0
-
-static
-SCM
-object_to_string (SCM obj) // variant 1
-{
-    SCM port = scm_open_output_string ();
-
-    scm_write (obj, port);
-
-    // result = scm_strport_to_string (port);
-    SCM str = scm_get_output_string (port);
-
-    scm_close_port (port);
-
-    return str;
-}
-
-#else
-
-static
-SCM
+static SCM
 object_to_string (SCM obj) // variant 2
 {
     SCM str = scm_object_to_string (obj, SCM_UNDEFINED);
 
     return str;
 }
-
-#endif
 
 //
 // These serialize/deserialize objects to char buffers
