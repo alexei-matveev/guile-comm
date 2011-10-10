@@ -23,12 +23,13 @@ static SCM read_buf (const char *buf, size_t max_len);
 //
 // Try exposing MPI_COMM_WORLD:
 //
-// static SCM comm_world;
+// static SCM guile_comm_world;
 
 //
 // Set a name on a communicator:
 //
-SCM comm_set_name (SCM world, SCM name)
+SCM
+guile_comm_set_name (SCM world, SCM name)
 {
     // extract MPI_Comm, verifies the type:
     MPI_Comm comm = scm_to_comm (world);
@@ -50,7 +51,8 @@ SCM comm_set_name (SCM world, SCM name)
     return scm_from_int (len);
 }
 
-SCM comm_init (SCM args) // MPI_Init
+SCM
+guile_comm_init (SCM args) // MPI_Init
 {
     int argc;
     char **argv;
@@ -68,7 +70,8 @@ SCM comm_init (SCM args) // MPI_Init
     return scm_from_comm (MPI_COMM_WORLD);
 }
 
-SCM comm_finalize (void) // MPI_Finalize
+SCM
+guile_comm_finalize (void) // MPI_Finalize
 {
     int ierr = MPI_Finalize ();
     assert (MPI_SUCCESS==ierr);
@@ -76,7 +79,8 @@ SCM comm_finalize (void) // MPI_Finalize
     return scm_from_int (ierr);
 }
 
-SCM comm_rank (SCM world) // MPI_Comm_rank (world, ...)
+SCM
+guile_comm_rank (SCM world) // MPI_Comm_rank (world, ...)
 {
     int rank;
 
@@ -89,7 +93,8 @@ SCM comm_rank (SCM world) // MPI_Comm_rank (world, ...)
     return scm_from_int (rank);
 }
 
-SCM comm_size (SCM world) // MPI_Comm_size (world, ...)
+SCM
+guile_comm_size (SCM world) // MPI_Comm_size (world, ...)
 {
     int size;
 
@@ -102,7 +107,8 @@ SCM comm_size (SCM world) // MPI_Comm_size (world, ...)
     return scm_from_int (size);
 }
 
-SCM comm_barrier (SCM world) // MPI_Barrier (world, ...)
+SCM
+guile_comm_barrier (SCM world) // MPI_Barrier (world, ...)
 {
     // extract MPI_Comm, verifies the type:
     MPI_Comm comm = scm_to_comm (world);
@@ -115,7 +121,8 @@ SCM comm_barrier (SCM world) // MPI_Barrier (world, ...)
 
 #ifdef NOT_NOW
 
-SCM comm_send_recv (SCM world, SCM dst, SCM src, SCM tag, SCM data) // MPI_Sendrecv, note argument order
+SCM
+guile_comm_send_recv (SCM world, SCM dst, SCM src, SCM tag, SCM data) // MPI_Sendrecv, note argument order
 {
     // extract MPI_Comm, verifies the type:
     MPI_Comm comm = scm_to_comm (world);
@@ -141,7 +148,8 @@ SCM comm_send_recv (SCM world, SCM dst, SCM src, SCM tag, SCM data) // MPI_Sendr
 
 #else
 
-SCM comm_send_recv (SCM world, SCM dst, SCM src, SCM tag, SCM obj) // MPI_Sendrecv, note argument order
+SCM
+guile_comm_send_recv (SCM world, SCM dst, SCM src, SCM tag, SCM obj) // MPI_Sendrecv, note argument order
 {
     size_t max_len = MAX_BUF_LENGTH;
 
@@ -185,7 +193,8 @@ SCM comm_send_recv (SCM world, SCM dst, SCM src, SCM tag, SCM obj) // MPI_Sendre
 // arbitrary types unrelated to input is an ugly abstraction:
 //
 #ifdef NOT_NOW
-SCM comm_send (SCM world, SCM dest, SCM tag, SCM data) // MPI_Send, note argument order
+SCM
+guile_comm_send (SCM world, SCM dest, SCM tag, SCM data) // MPI_Send, note argument order
 {
     // extract MPI_Comm, verifies the type:
     MPI_Comm comm = scm_to_comm (world);
@@ -202,7 +211,8 @@ SCM comm_send (SCM world, SCM dest, SCM tag, SCM data) // MPI_Send, note argumen
     return scm_from_int (ierr);
 }
 
-SCM comm_recv (SCM world, SCM source, SCM tag) // MPI_Recv
+SCM
+guile_comm_recv (SCM world, SCM source, SCM tag) // MPI_Recv
 {
     // extract MPI_Comm, verifies the type:
     MPI_Comm comm = scm_to_comm (world);
@@ -220,7 +230,8 @@ SCM comm_recv (SCM world, SCM source, SCM tag) // MPI_Recv
 }
 #else
 
-SCM comm_send (SCM world, SCM dst, SCM tag, SCM obj)
+SCM
+guile_comm_send (SCM world, SCM dst, SCM tag, SCM obj)
 {
     size_t max_len = MAX_BUF_LENGTH;
     char buf[MAX_BUF_LENGTH];
@@ -243,7 +254,8 @@ SCM comm_send (SCM world, SCM dst, SCM tag, SCM obj)
     return scm_from_int (ierr);
 }
 
-SCM comm_recv (SCM world, SCM src, SCM tag)
+SCM
+guile_comm_recv (SCM world, SCM src, SCM tag)
 {
     size_t max_len = MAX_BUF_LENGTH;
     char buf[MAX_BUF_LENGTH];
@@ -271,7 +283,8 @@ SCM comm_recv (SCM world, SCM src, SCM tag)
 
 #endif
 
-SCM comm_split (SCM world, SCM color) // MPI_Comm_split (world, color, ...)
+SCM
+guile_comm_split (SCM world, SCM color) // MPI_Comm_split (world, color, ...)
 {
     int ierr;
 
@@ -299,7 +312,8 @@ SCM comm_split (SCM world, SCM color) // MPI_Comm_split (world, color, ...)
 // I am afraid we cannot delegate freeing communicators
 // to garbage collector. Do it explicitly:
 //
-SCM comm_free (SCM world) // MPI_Comm_free
+SCM
+guile_comm_free (SCM world) // MPI_Comm_free
 {
     // extract MPI_Comm, verifies the type:
     MPI_Comm comm = scm_to_comm (world);
@@ -311,9 +325,10 @@ SCM comm_free (SCM world) // MPI_Comm_free
 }
 
 //
-// double comm_pi (MPI_Comm world, int n);
+// double guile_comm_pi (MPI_Comm world, int n);
 //
-SCM comm_pi (SCM world, SCM n)
+SCM
+guile_comm_pi (SCM world, SCM n)
 {
     // extract MPI_Comm, verifies the type:
     MPI_Comm comm = scm_to_comm (world);
@@ -330,7 +345,8 @@ SCM comm_pi (SCM world, SCM n)
 // These write/read scheme objects to scheme strings:
 //
 static
-SCM string_to_object (SCM str)
+SCM
+string_to_object (SCM str)
 {
     SCM port = scm_open_input_string (str);
 
@@ -344,7 +360,8 @@ SCM string_to_object (SCM str)
 #if 0
 
 static
-SCM object_to_string (SCM obj) // variant 1
+SCM
+object_to_string (SCM obj) // variant 1
 {
     SCM port = scm_open_output_string ();
 
@@ -361,7 +378,8 @@ SCM object_to_string (SCM obj) // variant 1
 #else
 
 static
-SCM object_to_string (SCM obj) // variant 2
+SCM
+object_to_string (SCM obj) // variant 2
 {
     SCM str = scm_object_to_string (obj, SCM_UNDEFINED);
 
@@ -395,8 +413,8 @@ size_t write_buf (SCM obj, char *buf, size_t max_len)
     return len + 1;
 }
 
-static
-SCM read_buf (const char *buf, size_t max_len)
+static SCM
+read_buf (const char *buf, size_t max_len)
 {
     // we expect here a \0-terminated string:
     SCM str = scm_from_locale_string (buf);
@@ -408,24 +426,24 @@ void init_guile_comm (void)
 {
     init_guile_comm_smob();
 
-    scm_c_define_gsubr ("comm-init", 1, 0, 0, comm_init);
-    scm_c_define_gsubr ("comm-finalize", 0, 0, 0, comm_finalize);
-    scm_c_define_gsubr ("comm-rank", 1, 0, 0, comm_rank);
-    scm_c_define_gsubr ("comm-size", 1, 0, 0, comm_size);
-    scm_c_define_gsubr ("comm-barrier", 1, 0, 0, comm_barrier);
-    scm_c_define_gsubr ("comm-send-recv", 5, 0, 0, comm_send_recv);
+    scm_c_define_gsubr ("comm-init", 1, 0, 0, guile_comm_init);
+    scm_c_define_gsubr ("comm-finalize", 0, 0, 0, guile_comm_finalize);
+    scm_c_define_gsubr ("comm-rank", 1, 0, 0, guile_comm_rank);
+    scm_c_define_gsubr ("comm-size", 1, 0, 0, guile_comm_size);
+    scm_c_define_gsubr ("comm-barrier", 1, 0, 0, guile_comm_barrier);
+    scm_c_define_gsubr ("comm-send-recv", 5, 0, 0, guile_comm_send_recv);
 
-    scm_c_define_gsubr ("comm-send", 4, 0, 0, comm_send);
-    scm_c_define_gsubr ("comm-recv", 3, 0, 0, comm_recv);
+    scm_c_define_gsubr ("comm-send", 4, 0, 0, guile_comm_send);
+    scm_c_define_gsubr ("comm-recv", 3, 0, 0, guile_comm_recv);
 
-    scm_c_define_gsubr ("comm-split", 2, 0, 0, comm_split);
-    scm_c_define_gsubr ("comm-free", 1, 0, 0, comm_free);
-    scm_c_define_gsubr ("comm-set-name", 2, 0, 0, comm_set_name);
-    scm_c_define_gsubr ("comm-pi", 2, 0, 0, comm_pi);
+    scm_c_define_gsubr ("comm-split", 2, 0, 0, guile_comm_split);
+    scm_c_define_gsubr ("comm-free", 1, 0, 0, guile_comm_free);
+    scm_c_define_gsubr ("comm-set-name", 2, 0, 0, guile_comm_set_name);
+    scm_c_define_gsubr ("comm-pi", 2, 0, 0, guile_comm_pi);
 
     // scm_c_define_gsubr ("object-to-string", 1, 0, 0, object_to_string);
     // scm_c_define_gsubr ("string-to-object", 1, 0, 0, string_to_object);
 
     // constants and variables:
-    // comm_world = scm_permanent_object (scm_c_define ("comm-world", scm_from_comm (MPI_COMM_WORLD)));
+    // guile_comm_world = scm_permanent_object (scm_c_define ("comm-world", scm_from_comm (MPI_COMM_WORLD)));
 }
