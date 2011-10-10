@@ -9,10 +9,7 @@
 // example parallel code:
 #include "pi.h"
 
-#ifdef NOT_NOW
-#else
 #define MAX_BUF_LENGTH 512
-#endif
 
 static SCM object_to_string (SCM obj);
 static SCM string_to_object (SCM obj);
@@ -119,35 +116,6 @@ guile_comm_barrier (SCM world) // MPI_Barrier (world, ...)
     return scm_from_int (ierr);
 }
 
-#ifdef NOT_NOW
-
-SCM
-guile_comm_send_recv (SCM world, SCM dst, SCM src, SCM tag, SCM data) // MPI_Sendrecv, note argument order
-{
-    // extract MPI_Comm, verifies the type:
-    MPI_Comm comm = scm_to_comm (world);
-
-    int idst = scm_to_int (dst);
-    int isrc = scm_to_int (src);
-
-    // FIXME: the same tag for send and recv:
-    int itag = scm_to_int (tag);
-
-    // FIXME: so far only works for ints:
-    int sendbuf = scm_to_int (data);
-    int recvbuf;
-    MPI_Status stat;
-
-    int ierr = MPI_Sendrecv (&sendbuf, 1, MPI_INT, idst, itag, \
-                             &recvbuf, 1, MPI_INT, isrc, itag, \
-                             comm, &stat);
-    assert (MPI_SUCCESS==ierr);
-
-    return scm_from_int (recvbuf);
-}
-
-#else
-
 SCM
 guile_comm_send_recv (SCM world, SCM dst, SCM src, SCM tag, SCM obj) // MPI_Sendrecv, note argument order
 {
@@ -186,50 +154,10 @@ guile_comm_send_recv (SCM world, SCM dst, SCM src, SCM tag, SCM obj) // MPI_Send
     return read_buf (recvbuf, ilen);
 }
 
-#endif
-
 //
 // Send as a procedure, receive as a function that returns
 // arbitrary types unrelated to input is an ugly abstraction:
 //
-#ifdef NOT_NOW
-SCM
-guile_comm_send (SCM world, SCM dest, SCM tag, SCM data) // MPI_Send, note argument order
-{
-    // extract MPI_Comm, verifies the type:
-    MPI_Comm comm = scm_to_comm (world);
-
-    int idest = scm_to_int (dest);
-    int itag = scm_to_int (tag);
-
-    // FIXME: so far only works for ints:
-    int idata = scm_to_int (data);
-
-    int ierr = MPI_Send (&idata, 1, MPI_INT, idest, itag, comm);
-    assert (MPI_SUCCESS==ierr);
-
-    return scm_from_int (ierr);
-}
-
-SCM
-guile_comm_recv (SCM world, SCM source, SCM tag) // MPI_Recv
-{
-    // extract MPI_Comm, verifies the type:
-    MPI_Comm comm = scm_to_comm (world);
-
-    int isource = scm_to_int (source);
-    int itag = scm_to_int (tag);
-
-    // FIXME: so far only excpecting ints:
-    int idata;
-    MPI_Status stat;
-    int ierr = MPI_Recv (&idata, 1, MPI_INT, isource, itag, comm, &stat);
-    assert (MPI_SUCCESS==ierr);
-
-    return scm_from_int (idata);
-}
-#else
-
 SCM
 guile_comm_send (SCM world, SCM dst, SCM tag, SCM obj)
 {
@@ -280,8 +208,6 @@ guile_comm_recv (SCM world, SCM src, SCM tag)
 
     return read_buf (buf, ilen);
 }
-
-#endif
 
 SCM
 guile_comm_split (SCM world, SCM color) // MPI_Comm_split (world, color, ...)
