@@ -117,6 +117,51 @@ guile_comm_barrier (SCM world) // MPI_Barrier (world, ...)
 }
 
 SCM
+guile_comm_bcast (const SCM world, const SCM root, const SCM obj) // MPI_Bcast, note argument order
+{
+    size_t len;
+    char *sendbuf;
+    char recvbuf[MAX_BUF_LENGTH];
+
+    // extract MPI_Comm, verifies the type:
+    MPI_Comm comm = scm_to_comm (world);
+
+    int iroot = scm_to_int (root);
+
+    int rank;
+    int ierr = MPI_Comm_rank (comm, &rank);
+    assert (MPI_SUCCESS==ierr);
+
+    if ( rank == iroot ) {
+        // searialize the object, dont forget to free() later:
+        sendbuf = scm_to_byte_string (obj, &len);
+    }
+
+    // Broadcast the size, or should we always send MAX_BUF_LENGTH?
+    ierr = MPI_Bcast (&len, 1, MPI_INT, iroot, comm);
+    assert (MPI_SUCCESS==ierr);
+
+    // FIXME: recv buffer has finite length:
+    assert (len <= MAX_BUF_LENGTH);
+
+    if ( rank == iroot ) {
+        ierr = MPI_Bcast ( sendbuf, len, MPI_CHAR, iroot, comm);
+        assert (MPI_SUCCESS==ierr);
+        free (sendbuf);
+    } else {
+        ierr = MPI_Bcast (&recvbuf, len, MPI_CHAR, iroot, comm);
+        assert (MPI_SUCCESS==ierr);
+    }
+
+    if ( rank == iroot ) {
+        // FIXME: should we return a copy instead?
+        return obj;
+    } else {
+        return scm_from_byte_string (recvbuf, len);
+    }
+}
+
+SCM
 guile_comm_send_recv (SCM world, SCM dst, SCM src, SCM tag, SCM obj) // MPI_Sendrecv, note argument order
 {
     size_t len;
@@ -324,8 +369,10 @@ void init_guile_comm (void)
     scm_c_define_gsubr ("comm-rank", 1, 0, 0, guile_comm_rank);
     scm_c_define_gsubr ("comm-size", 1, 0, 0, guile_comm_size);
     scm_c_define_gsubr ("comm-barrier", 1, 0, 0, guile_comm_barrier);
-    scm_c_define_gsubr ("comm-send-recv", 5, 0, 0, guile_comm_send_recv);
 
+    scm_c_define_gsubr ("comm-bcast", 3, 0, 0, guile_comm_bcast);
+
+    scm_c_define_gsubr ("comm-send-recv", 5, 0, 0, guile_comm_send_recv);
     scm_c_define_gsubr ("comm-send", 4, 0, 0, guile_comm_send);
     scm_c_define_gsubr ("comm-recv", 3, 0, 0, guile_comm_recv);
 
