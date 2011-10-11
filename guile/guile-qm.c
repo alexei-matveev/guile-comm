@@ -42,7 +42,7 @@ static void
 guile_main (void *data, int argc, char **argv)
 {
     // defines comm-* gsubrs:
-    init_guile_comm();
+    guile_comm_init_module ();
 
     scm_c_define_gsubr ("qm-init", 0, 0, 0, guile_qm_init);
     scm_c_define_gsubr ("qm-run", 1, 0, 0, guile_qm_run);

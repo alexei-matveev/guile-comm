@@ -6,13 +6,13 @@ MPI_Comm scm_to_comm (const SCM smob);
 
 //
 // This extends interpreter by comm-* primitives,
-// calls init_guile_comm_smob() too.
+// calls guile_comm_init_smob() too.
 //
-void init_guile_comm (void);
+void guile_comm_init_module (void);
 
 //
 // In case MPI_Comm is represented by a SMOB call this
 // at initialization:
 //
-void init_guile_comm_smob (void);
+void guile_comm_init_smob (void);
 

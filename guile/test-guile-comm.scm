@@ -1,5 +1,5 @@
 ;(define libguile-comm (dynamic-link "./libguile-comm.so"))
-;(dynamic-call "init_guile_comm" libguile-comm)
+;(dynamic-call "guile_comm_init_module" libguile-comm)
 
 ;; returns MPI_COMM_WORLD:
 (define world

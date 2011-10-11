@@ -375,7 +375,7 @@ scm_from_byte_string (const char *buf, size_t len)
     return string_to_object (str);
 }
 
-void init_guile_comm (void)
+void guile_comm_init_module (void)
 {
     //
     // size_t varies between 32/64 platforms, set MPI_SIZE_T here:
@@ -387,7 +387,7 @@ void init_guile_comm (void)
     } else {
         assert (0);
     }
-    init_guile_comm_smob();
+    guile_comm_init_smob();
 
     scm_c_define_gsubr ("comm-init", 1, 0, 0, guile_comm_init);
     scm_c_define_gsubr ("comm-finalize", 0, 0, 0, guile_comm_finalize);

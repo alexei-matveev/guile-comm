@@ -23,7 +23,7 @@ inner_main (void *data, int argc, char **argv)
    *
    *  in Scheme code.
    */
-  init_guile_comm();
+  guile_comm_init_module ();
 
   scm_shell (argc, argv); // never returns
 

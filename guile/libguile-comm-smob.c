@@ -80,7 +80,7 @@ comm_t_print (SCM world, SCM port, scm_print_state *pstate)
     return 1;
 }
 
-void init_guile_comm_smob (void)
+void guile_comm_init_smob (void)
 {
     comm_t_tag = scm_make_smob_type ("comm", sizeof (struct comm_t));
     /*
