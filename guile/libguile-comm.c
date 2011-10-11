@@ -11,6 +11,20 @@
 
 #define MAX_BUF_LENGTH 512
 
+//
+// size_t varies between 32/64 platforms, will be redefined later:
+//
+static MPI_Datatype MPI_SIZE_T = MPI_UNSIGNED;
+
+// FIXME: make Intel icc understand this:
+//#if sizeof (size_t) == sizeof (unsigned long)
+//#define MPI_SIZE_T MPI_UNSIGNED_LONG
+//#elif sizeof (size_t) == sizeof (unsigned int)
+//#define MPI_SIZE_T MPI_UNSIGNED
+//#else
+//#error "unknown size_t"
+//#endif
+
 static SCM object_to_string (SCM obj);
 static SCM string_to_object (SCM obj);
 
@@ -135,10 +149,12 @@ guile_comm_bcast (const SCM world, const SCM root, const SCM obj) // MPI_Bcast, 
     if ( rank == iroot ) {
         // searialize the object, dont forget to free() later:
         sendbuf = scm_to_byte_string (obj, &len);
+        // FIXME: recv buffer has finite length:
+        assert (len <= MAX_BUF_LENGTH);
     }
 
     // Broadcast the size, or should we always send MAX_BUF_LENGTH?
-    ierr = MPI_Bcast (&len, 1, MPI_INT, iroot, comm);
+    ierr = MPI_Bcast (&len, 1, MPI_SIZE_T, iroot, comm);
     assert (MPI_SUCCESS==ierr);
 
     // FIXME: recv buffer has finite length:
@@ -362,6 +378,16 @@ scm_from_byte_string (const char *buf, size_t len)
 
 void init_guile_comm (void)
 {
+    //
+    // size_t varies between 32/64 platforms, set MPI_SIZE_T here:
+    //
+    if (sizeof (size_t) == sizeof (unsigned long)) {
+        MPI_SIZE_T = MPI_UNSIGNED_LONG;
+    } else if ( sizeof (size_t) == sizeof (unsigned int)) {
+        MPI_SIZE_T = MPI_UNSIGNED;
+    } else {
+        assert (0);
+    }
     init_guile_comm_smob();
 
     scm_c_define_gsubr ("comm-init", 1, 0, 0, guile_comm_init);
