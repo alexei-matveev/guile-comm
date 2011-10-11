@@ -355,10 +355,9 @@ object_to_string (SCM obj) // variant 2
 }
 
 //
-// These serialize/deserialize objects to char buffers
-//
-// FIXME: both sending/receiving and serializing/deserializing
-//        of variable buffer sizes.
+// These serialize/deserialize objects to char buffers.
+// Dont forget to free() the result of scm_to_byte_string()
+// when finished:
 //
 static char *
 scm_to_byte_string (SCM obj, size_t *lenp)
