@@ -161,11 +161,11 @@ guile_comm_bcast (const SCM world, const SCM root, const SCM obj) // MPI_Bcast, 
     assert (len <= MAX_BUF_LENGTH);
 
     if ( rank == iroot ) {
-        ierr = MPI_Bcast ( sendbuf, len, MPI_CHAR, iroot, comm);
+        ierr = MPI_Bcast (sendbuf, len, MPI_CHAR, iroot, comm);
         assert (MPI_SUCCESS==ierr);
         free (sendbuf);
     } else {
-        ierr = MPI_Bcast (&recvbuf, len, MPI_CHAR, iroot, comm);
+        ierr = MPI_Bcast (recvbuf, len, MPI_CHAR, iroot, comm);
         assert (MPI_SUCCESS==ierr);
     }
 
@@ -200,8 +200,8 @@ guile_comm_send_recv (SCM world, SCM dst, SCM src, SCM tag, SCM obj) // MPI_Send
     MPI_Status stat;
 
     // send just enough elements:
-    int ierr = MPI_Sendrecv ( sendbuf,            len, MPI_CHAR, idst, itag, \
-                             &recvbuf, MAX_BUF_LENGTH, MPI_CHAR, isrc, itag, \
+    int ierr = MPI_Sendrecv (sendbuf,            len, MPI_CHAR, idst, itag, \
+                             recvbuf, MAX_BUF_LENGTH, MPI_CHAR, isrc, itag, \
                              comm, &stat);
     assert (MPI_SUCCESS==ierr);
 
