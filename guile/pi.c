@@ -2,6 +2,8 @@
 #include <assert.h>
 // #include <stdio.h>
 
+#include "pi.h"
+
 double pi (MPI_Comm world, int n)
 {
     int rank, size, rc;
