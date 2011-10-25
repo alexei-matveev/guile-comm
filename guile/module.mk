@@ -14,9 +14,7 @@
 #
 # CURDIR is set on every make or $(MAKE) -C dir:
 #
-ifndef GUILE
-GUILE = $(CURDIR)
-endif
+GUILE ?= $(CURDIR)
 
 #
 # These may be used to refer to the targets from outside:
