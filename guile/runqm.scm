@@ -4,23 +4,27 @@
 ;;
 ;; This is artificial intelligence guessing temp dir:
 ;;
-(define (guess-temp-dir)
-  (or (getenv "TTFSTMP") ; returns the first that is set ...
-    (getenv "SCRATCH")
-    (getenv "OPT_TMP")
-    (getenv "TEMP")
-    (string-append "/scratch/" (getenv "USER")))) ; if none is set use this
+(define (guess-temp-dir input)
+  (let ((prefix (or (getenv "TTFSTMP") ; returns the first that is set ...
+                    (getenv "SCRATCH")
+                    (getenv "OPT_TMP")
+                    (getenv "TEMP")
+                    (string-append "/scratch/" (getenv "USER"))))) ; if none is set use this
+    (string-append prefix "/" (input-base-name input) "-" (number->string (getpid)))))
 
 ;;
 ;; This emulates the behaviour of the "runpg" bash script
 ;; that tells PG to put output into o.name/ for an input i.name:
 ;;
 (define (guess-output-dir input)
-  (or
-    (and (string=? "input" input) ".") ; for input named input use CWD
-    (and (string-prefix? "i." input)
-      (string-append "o." (string-drop input 2)))
-    (string-append "o." input))) ; by default use o.$input for output
+  (cond
+    ((string=? "input" input) ".") ; for input named input use CWD
+    (#t (string-append "o." (input-base-name input))))) ; by default use o.$name for output
+
+(define (input-base-name input)
+  (cond
+    ((string-prefix? "i." input) (string-drop input 2))
+    (#t input)))
 
 ;;
 ;; Now that we are responsible for creating directories ourselves
@@ -45,7 +49,7 @@
 ;;
 (define (run world input)
   (let
-    ((temp-dir (comm-bcast world 0 (guess-temp-dir))) ; prefer the value at rank 0
+    ((temp-dir (comm-bcast world 0 (guess-temp-dir input))) ; prefer the value at rank 0
     (output-dir (comm-bcast world 0 (guess-output-dir input))))
       (begin
         (setenv "TTFSINPUT" input)
@@ -53,7 +57,9 @@
         (setenv "TTFSTMP" temp-dir)
         (maybe-mkdir! world temp-dir) ; it case it isnt, create it, on all workes
         (maybe-mkdir! world output-dir)
-        (qm-run world)))) ; this invokes the program
+        (qm-run world) ; this invokes the program
+        (system (string-append "echo Dont forget to rm -rf " temp-dir)))))
+        ; FIXME: do "rm -rf" when confident
 
 ;;
 ;; Intialize MPI, get the world communicator:
