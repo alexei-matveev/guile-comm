@@ -5,8 +5,7 @@
 ;; This is artificial intelligence guessing temp dir:
 ;;
 (define (guess-temp-dir input)
-  (let ((prefix (or (getenv "TTFSTMP") ; returns the first that is set ...
-                    (getenv "SCRATCH") ; set on SuperMUC
+  (let ((prefix (or (getenv "SCRATCH") ; set on SuperMUC
                     (getenv "OPT_TMP") ; used by LRZ
                     (getenv "TEMP")    ; not sure if ever used
                     "/scratch")))      ; if none is set use this
@@ -69,7 +68,7 @@
     (begin
       (setenv "TTFSINPUT" input)
       (setenv "TTFSOUTPUTDIR" output-dir)
-      (setenv "TTFSTMP" temp-dir) ; FIXME: see getenv in guess-temp-dir
+      (setenv "TTFSTMP" temp-dir)	; dont ask in guess-temp-dir
       (maybe-mkdir! world temp-dir)	; create temp-dir
       (maybe-mkdir! world output-dir)
       (qm-run world)			; this invokes the program
