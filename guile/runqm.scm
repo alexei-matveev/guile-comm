@@ -73,7 +73,7 @@
       (maybe-mkdir! world temp-dir)	; create temp-dir
       (maybe-mkdir! world output-dir)
       (qm-run world)			; this invokes the program
-      (maybe-rm-rf! world temp-dir))))	; remove temp-dir
+      (maybe-rm-rf! world temp-dir))))	; remove temp-dir, DANGEROUS !!!
 
 ;;
 ;; Intialize MPI, get the world communicator:
