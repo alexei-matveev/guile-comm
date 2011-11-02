@@ -33,16 +33,30 @@
 ;; we need to coordinate the work between process within and between
 ;; SMP hosts:
 ;;
-(define (maybe-mkdir! world dirname)
-  (let ((dirname (comm-bcast world 0 dirname))) ; prefer the value at rank 0
-    (let loop ((rank 0))
-      (if (< rank (comm-size world))
-        (begin
-          (if (= rank (comm-rank world)) ; my turn to act ...
-            (if (not (file-exists? dirname))
-              (mkdir dirname)))
-          (comm-barrier world) ; others wait here, till I finish with mkdir ...
-          (loop (+ rank 1)))))))
+(define (maybe-mkdir! world dirname) ; dirname is the same for all ranks
+  (critical world
+	    (lambda ()
+	      (if (not (file-exists? dirname))
+		  (mkdir dirname)))))
+
+(define (maybe-rm-rf! world dirname) ; dirname is the same for all ranks
+  (critical world
+	    (lambda ()
+	      (if (file-exists? dirname)
+		  (system (string-append "rm -rf " dirname)))))) ; DANGEROUS !!!
+
+;;
+;; Call proc without arguments for each rank in sequence with
+;; comm-barrier inbetween:
+;;
+(define (critical world proc)
+  (let loop ((rank 0))
+    (if (< rank (comm-size world))
+	(begin
+	  (if (= rank (comm-rank world)) ; my turn to act ...
+	      (proc))
+	  (comm-barrier world) ; others wait here, till I finish with mkdir ...
+	  (loop (+ rank 1))))))
 
 ;;
 ;; Set TTFSTMP to something different from $PWD to avoid
@@ -51,17 +65,16 @@
 ;;
 (define (run world input)
   (let
-    ((temp-dir (comm-bcast world 0 (guess-temp-dir input))) ; prefer the value at rank 0
-    (output-dir (comm-bcast world 0 (guess-output-dir input))))
-      (begin
-        (setenv "TTFSINPUT" input)
-        (setenv "TTFSOUTPUTDIR" output-dir)
-        (setenv "TTFSTMP" temp-dir)
-        (maybe-mkdir! world temp-dir) ; it case it isnt, create it, on all workes
-        (maybe-mkdir! world output-dir)
-        (qm-run world) ; this invokes the program
-        (system (string-append "echo Dont forget to rm -rf " temp-dir)))))
-        ; FIXME: do "rm -rf" when confident
+      ((temp-dir (comm-bcast world 0 (guess-temp-dir input))) ; prefer the value at rank 0
+       (output-dir (comm-bcast world 0 (guess-output-dir input))))
+    (begin
+      (setenv "TTFSINPUT" input)
+      (setenv "TTFSOUTPUTDIR" output-dir)
+      (setenv "TTFSTMP" temp-dir) ; FIXME: see getenv in guess-temp-dir
+      (maybe-mkdir! world temp-dir)	; create temp-dir
+      (maybe-mkdir! world output-dir)
+      (qm-run world)			; this invokes the program
+      (maybe-rm-rf! world temp-dir))))	; remove temp-dir
 
 ;;
 ;; Intialize MPI, get the world communicator:
