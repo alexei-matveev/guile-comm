@@ -85,9 +85,9 @@
 ;;
 (let loop ((inputs (cdr (command-line)))) ; first argument is the program name
   (if (not (null? inputs))
-    (begin
-      (run world (car inputs)) ; this invokes the program
-      (loop (cdr inputs)))))
+      (begin
+	(run world (car inputs))	; this invokes the program
+	(loop (cdr inputs)))))
 
 ;;
 ;; No more communication after that:
