@@ -6,11 +6,13 @@
 ;;
 (define (guess-temp-dir input)
   (let ((prefix (or (getenv "TTFSTMP") ; returns the first that is set ...
-                    (getenv "SCRATCH")
-                    (getenv "OPT_TMP")
-                    (getenv "TEMP")
-                    (string-append "/scratch/" (getenv "USER"))))) ; if none is set use this
-    (string-append prefix "/" (input-base-name input) "-" (number->string (getpid)))))
+                    (getenv "SCRATCH") ; set on SuperMUC
+                    (getenv "OPT_TMP") ; used by LRZ
+                    (getenv "TEMP")    ; not sure if ever used
+                    "/scratch")))      ; if none is set use this
+    (string-append prefix "/" (getenv "USER") "-"
+		   (input-base-name input) "-"
+		   (number->string (getpid)))))
 
 ;;
 ;; This emulates the behaviour of the "runpg" bash script
