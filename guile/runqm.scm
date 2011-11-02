@@ -15,8 +15,8 @@
 		   (number->string (getpid)))))
 
 ;;
-;; This emulates the behaviour of the "runpg" bash script
-;; that tells PG to put output into o.name/ for an input i.name:
+;; This emulates the behaviour of the "runpg" bash script that tells
+;; PG to put output into o.name/ for an input i.name:
 ;;
 (define (guess-output-dir input)
   (cond
@@ -29,9 +29,9 @@
     (#t input)))
 
 ;;
-;; Now that we are responsible for creating directories ourselves
-;; we need to coordinate the work between process within and between
-;; SMP hosts:
+;; Now that we are responsible for creating directories ourselves we
+;; need to coordinate the work between process within and between SMP
+;; hosts:
 ;;
 (define (maybe-mkdir! world dirname) ; dirname is the same for all ranks
   (critical world
@@ -59,9 +59,8 @@
 	  (loop (+ rank 1))))))
 
 ;;
-;; Set TTFSTMP to something different from $PWD to avoid
-;; polluting working directory with temporary files
-;; before running PG:
+;; Set TTFSTMP to something different from $PWD to avoid polluting
+;; working directory with temporary files before running PG:
 ;;
 (define (run world input)
   (let
