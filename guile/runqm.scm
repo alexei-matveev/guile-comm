@@ -1,6 +1,8 @@
 #!/usr/bin/env guile-qm
 !#
 
+(use-modules (ice-9 syncase))		; syntax-rules
+
 ;;
 ;; This is artificial intelligence guessing temp dir:
 ;;
@@ -28,34 +30,35 @@
     (#t input)))
 
 ;;
+;; Evaluate one or more expression for each rank in sequence with
+;; comm-barrier inbetween (critical world expr1 expr2 ...) to be
+;; compared with (begin expr1 expr2 ...)
+;;
+(define-syntax critical
+  (syntax-rules ()
+    ((critical world expr1 expr2 ...)
+     (let loop ((rank 0)) ; quote this sexp with ' to check the transcription
+       (if (< rank (comm-size world))
+	   (begin
+	     (if (= rank (comm-rank world)) ; My turn to ...
+		 (begin expr1 expr2 ...))   ; ... evaluate expresssions.
+	     (comm-barrier world))	    ; Others wait here.
+	     (loop (+ rank 1)))))))
+
+;;
 ;; Now that we are responsible for creating directories ourselves we
 ;; need to coordinate the work between process within and between SMP
 ;; hosts:
 ;;
 (define (maybe-mkdir! world dirname) ; dirname is the same for all ranks
   (critical world
-	    (lambda ()
-	      (if (not (file-exists? dirname))
-		  (mkdir dirname)))))
+	    (if (not (file-exists? dirname))
+		(mkdir dirname))))
 
 (define (maybe-rm-rf! world dirname) ; dirname is the same for all ranks
   (critical world
-	    (lambda ()
-	      (if (file-exists? dirname)
-		  (system (string-append "rm -rf " dirname)))))) ; DANGEROUS !!!
-
-;;
-;; Call proc without arguments for each rank in sequence with
-;; comm-barrier inbetween:
-;;
-(define (critical world proc)
-  (let loop ((rank 0))
-    (if (< rank (comm-size world))
-	(begin
-	  (if (= rank (comm-rank world)) ; my turn to act ...
-	      (proc))
-	  (comm-barrier world) ; others wait here, till I finish with proc ...
-	  (loop (+ rank 1))))))
+	    (if (file-exists? dirname)
+		(system (string-append "rm -rf " dirname))))) ; DANGEROUS !!!
 
 ;;
 ;; Set TTFSTMP to something different from $PWD to avoid polluting
