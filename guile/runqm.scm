@@ -42,8 +42,8 @@
 	   (begin
 	     (if (= rank (comm-rank world)) ; My turn to ...
 		 (begin expr1 expr2 ...))   ; ... evaluate expresssions.
-	     (comm-barrier world))	    ; Others wait here.
-	     (loop (+ rank 1)))))))
+	     (comm-barrier world)	    ; Others wait here.
+	     (loop (+ rank 1))))))))
 
 ;;
 ;; Now that we are responsible for creating directories ourselves we
