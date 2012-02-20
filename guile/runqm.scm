@@ -1,6 +1,14 @@
 #!/usr/bin/env guile-qm
 !#
 
+;;
+;; Load  user-specific config,  this may  also set  the  %load-path to
+;; search for files/modules:
+;;
+(let ((conf (string-append (getenv "HOME") "/.qmrc")))
+  (if (file-exists? conf)
+      (load conf)))
+
 (use-modules (ice-9 syncase))		; syntax-rules
 
 ;;
