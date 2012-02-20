@@ -85,7 +85,8 @@ interface
    end function scm_inexact_p
 
    !
-   ! Type constructors, integers, doubles, strings, logicals:
+   ! Type constructors/accessors, integers, doubles, strings,
+   ! logicals, lists:
    !
 
    !
@@ -167,6 +168,16 @@ interface
      integer(c_size_t), intent(in), value :: max_len
      integer(c_size_t) :: length
    end function scm_to_locale_stringbuf
+
+   function scm_cons (car, cdr) result (pair) bind (c)
+     !
+     ! SCM scm_cons (SCM car, SCM cdr)
+     !
+     use iso_c_binding
+     implicit none
+     type(c_ptr), intent(in), value :: car, cdr
+     type(c_ptr) :: pair
+   end function scm_cons
 
    function scm_car (pair) result (car) bind (c)
      !
@@ -425,7 +436,7 @@ contains
        stop "test: ERROR: symbol too long!"
     end if
 
-    out = lookup (buf(1:slen))
+    out = scm_cons (lookup (buf(1:slen)), object)
   end function test
 
 end module scm
