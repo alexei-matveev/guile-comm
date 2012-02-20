@@ -240,6 +240,38 @@ interface
    end function scm_variable_ref
 end interface
 
+!
+! Predicates:
+!
+public :: scm_is_symbol         ! SCM obj -> logical
+public :: scm_is_string         ! SCM obj -> logical
+public :: scm_is_number         ! SCM obj -> logical
+public :: scm_is_pair           ! SCM obj -> logical
+public :: scm_is_null           ! SCM obj -> logical
+
+public :: scm_is_true           ! SCM obj -> logical
+public :: scm_is_exact          ! SCM obj -> logical
+public :: scm_is_inexact        ! SCM obj -> logical
+
+!
+! Accessors:
+!
+public :: scm_to_int            ! SCM int -> integer
+public :: scm_to_double         ! SCM double -> double
+public :: scm_to_stringbuf      ! SCM string -> (Maybe string, integer)
+
+public :: scm_car               ! SCM pair -> SCM car
+public :: scm_cdr               ! SCM pair -> SCM cdr
+
+!
+! Constructors:
+!
+public :: scm_from_int          ! integer -> SCM int
+public :: scm_from_double       ! double -> SCM double
+public :: scm_from_string       ! string -> SCM string
+
+public :: scm_cons              ! SCM car -> SCM cdr -> SCM pair
+
 contains
 
    function scm_is_true (object) result (yes)
