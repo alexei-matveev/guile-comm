@@ -179,6 +179,15 @@ interface
      type(c_ptr) :: pair
    end function scm_cons
 
+   function scm_eol () result (empty) bind (c, name="guile_macro_scm_eol")
+     !
+     ! SCM SCM_EOL
+     !
+     use iso_c_binding
+     implicit none
+     type(c_ptr) :: empty
+   end function scm_eol
+
    function scm_car (pair) result (car) bind (c)
      !
      ! SCM scm_car (SCM pair)
@@ -271,6 +280,7 @@ public :: scm_from_double       ! double -> SCM double
 public :: scm_from_string       ! string -> SCM string
 
 public :: scm_cons              ! SCM car -> SCM cdr -> SCM pair
+public :: scm_eol               ! () -> SCM empty
 
 contains
 
@@ -418,14 +428,15 @@ contains
     integer :: slen
 
     if (scm_is_number (obj) ) then
+
        if (scm_is_exact (obj)) then
           write (*, '(I6)', advance='no') scm_to_int (obj)
        else
           write (*, '(F12.6)', advance='no') scm_to_double (obj)
        endif
-    endif
 
-    if (scm_is_symbol (obj)) then
+    else if (scm_is_symbol (obj)) then
+
        call scm_to_stringbuf (scm_symbol_to_string (obj), buf, slen)
 
        if ( slen > len(buf) ) then
@@ -433,18 +444,21 @@ contains
        endif
 
        write (*, "('''', A)", advance='no') buf(1:slen)
-    endif
 
-    if (scm_is_pair (obj)) then
+    else if (scm_is_null (obj)) then
+
+       write (*, '("nil")', advance='no')
+
+    else if (scm_is_pair (obj)) then
+
        write (*, '("(")', advance='no')
        call display (scm_car (obj))
        write (*, '(" . ")', advance='no')
        call display (scm_cdr (obj))
        write (*, '(")")', advance='no')
-    endif
 
-    if (scm_is_null (obj)) then
-       write (*, '("nil")', advance='no')
+    else
+       write (*, '("???")', advance='no')
     endif
   end subroutine display
 
@@ -468,7 +482,9 @@ contains
        stop "test: ERROR: symbol too long!"
     end if
 
-    out = scm_cons (lookup (buf(1:slen)), object)
+    out = scm_cons (scm_eol(), scm_cons (lookup (buf(1:slen)), object))
+    call display (out)
+    write (*, *)
   end function test
 
 end module scm
