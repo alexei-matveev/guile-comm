@@ -9,6 +9,7 @@
 ifndef RANLIB
     RANLIB = ranlib
     CC = mpicc
+    FC = mpif90
     AR = ar
     CFLAGS = -Wall
 endif
@@ -45,6 +46,9 @@ guile-comm: guile-comm.o $(libguile-comm.a)
 
 %.d: %.c
 	$(CC) -MT $(@:.d=.o) -MM $(<) > $(@)
+
+%.o: %.f90
+	$(FC) -c $(<)
 
 clean:
 	rm -f $(cobjs) $(cobjs:.o=.d)
