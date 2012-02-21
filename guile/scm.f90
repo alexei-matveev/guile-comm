@@ -488,6 +488,16 @@ contains
           write (*, '(F12.6)', advance='no') scm_to_double (obj)
        endif
 
+    else if (scm_is_string (obj)) then
+
+       call scm_to_stringbuf (obj, buf, slen)
+
+       if ( slen > len(buf) ) then
+          stop "display: ERROR: string too long!"
+       endif
+
+       write (*, "('""', A, '""')", advance='no') buf(1:slen)
+
     else if (scm_is_symbol (obj)) then
 
        call scm_to_stringbuf (scm_symbol_to_string (obj), buf, slen)
@@ -500,7 +510,7 @@ contains
 
     else if (scm_is_null (obj)) then
 
-       write (*, '("nil")', advance='no')
+       write (*, '("()")', advance='no')
 
     else if (scm_is_pair (obj)) then
 
