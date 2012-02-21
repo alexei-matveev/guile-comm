@@ -4,6 +4,28 @@ use iso_c_binding
 implicit none
 private
 
+!
+! Short structs  with size matching that  of some integer  type may be
+! passed/returned  in  registers. That  depends  on  the platform  ABI
+! convention.   BIND(C)  on  the  type(scm_t)  and  relevant  function
+! interfaces requests the Fortran compiler to emulate the behaviour of
+! (some) C compiler.
+!
+! http://gcc.gnu.org/onlinedocs/gcc/Code-Gen-Options.html
+! www.x86-64.org/documentation/abi.pdf
+!
+! FIXME: Intel  compiler versions 11.1 and  12.1 break ABI  by using a
+! custom convention of returning a struct. In this case one might want
+! to replace all instances of type(scm_t) by integer(c_intptr_t).
+!
+type, public, bind(c) :: scm_t
+   private
+   integer(c_intptr_t) :: ptr
+end type scm_t
+!define SCM_T integer(c_intptr_t)
+!define SCM_T type(scm_t)
+!define SCM_T type(c_ptr)
+
 interface
    !
    ! No object satises more than one of the following predicates:
@@ -17,8 +39,8 @@ interface
      !
      import
      implicit none
-     type(c_ptr), intent(in), value :: object
-     type(c_ptr) :: yes
+     type(scm_t), intent(in), value :: object
+     type(scm_t) :: yes
    end function scm_symbol_p
 
    function scm_string_p (object) result (yes) bind (c)
@@ -27,8 +49,8 @@ interface
      !
      import
      implicit none
-     type(c_ptr), intent(in), value :: object
-     type(c_ptr) :: yes
+     type(scm_t), intent(in), value :: object
+     type(scm_t) :: yes
    end function scm_string_p
 
    function scm_number_p (object) result (yes) bind (c)
@@ -37,8 +59,8 @@ interface
      !
      import
      implicit none
-     type(c_ptr), intent(in), value :: object
-     type(c_ptr) :: yes
+     type(scm_t), intent(in), value :: object
+     type(scm_t) :: yes
    end function scm_number_p
 
    function scm_pair_p (object) result (yes) bind (c)
@@ -47,8 +69,8 @@ interface
      !
      import
      implicit none
-     type(c_ptr), intent(in), value :: object
-     type(c_ptr) :: yes
+     type(scm_t), intent(in), value :: object
+     type(scm_t) :: yes
    end function scm_pair_p
 
    function scm_null_p (object) result (yes) bind (c)
@@ -57,8 +79,8 @@ interface
      !
      import
      implicit none
-     type(c_ptr), intent(in), value :: object
-     type(c_ptr) :: yes
+     type(scm_t), intent(in), value :: object
+     type(scm_t) :: yes
    end function scm_null_p
 
    !
@@ -70,8 +92,8 @@ interface
      !
      import
      implicit none
-     type(c_ptr), intent(in), value :: object
-     type(c_ptr) :: yes
+     type(scm_t), intent(in), value :: object
+     type(scm_t) :: yes
    end function scm_exact_p
 
    function scm_inexact_p (object) result (yes) bind (c)
@@ -80,8 +102,8 @@ interface
      !
      import
      implicit none
-     type(c_ptr), intent(in), value :: object
-     type(c_ptr) :: yes
+     type(scm_t), intent(in), value :: object
+     type(scm_t) :: yes
    end function scm_inexact_p
 
    !
@@ -90,8 +112,8 @@ interface
    !
 
    !
-   ! FIXME: Guile API exports a macro for this, we added a function,
-   ! see guile-api.c:
+   ! FIXME: Guile API exports a macro for some of these, we added a
+   ! function, see guile-api.c:
    !
    function guile_macro_scm_is_true (object) result (yes) bind (c)
      !
@@ -99,7 +121,7 @@ interface
      !
      import
      implicit none
-     type(c_ptr), intent(in), value :: object
+     type(scm_t), intent(in), value :: object
      integer(c_int) :: yes
    end function guile_macro_scm_is_true
 
@@ -110,7 +132,7 @@ interface
      import
      implicit none
      integer(c_int), intent(in), value :: i
-     type(c_ptr) :: exact
+     type(scm_t) :: exact
    end function scm_from_int
 
    !
@@ -122,7 +144,7 @@ interface
      !
      import
      implicit none
-     type(c_ptr), intent(in), value :: exact
+     type(scm_t), intent(in), value :: exact
      integer(c_int) :: i
    end function scm_to_int
 
@@ -133,7 +155,7 @@ interface
      import
      implicit none
      real(c_double), intent(in), value :: d
-     type(c_ptr) :: inexact
+     type(scm_t) :: inexact
    end function scm_from_double
 
    function scm_to_double (inexact) result (d) bind (c)
@@ -142,7 +164,7 @@ interface
      !
      import
      implicit none
-     type(c_ptr), intent(in), value :: inexact
+     type(scm_t), intent(in), value :: inexact
      real(c_double) :: d
    end function scm_to_double
 
@@ -154,7 +176,7 @@ interface
      implicit none
      character(kind=c_char) :: str(*)
      integer(c_size_t), intent(in), value :: len
-     type(c_ptr) :: string
+     type(scm_t) :: string
    end function scm_from_locale_stringn
 
    function scm_to_locale_stringbuf (str, buf, max_len) result (length) bind (c)
@@ -163,7 +185,7 @@ interface
      !
      import
      implicit none
-     type(c_ptr), intent(in), value :: str
+     type(scm_t), intent(in), value :: str
      character(kind=c_char) :: buf(*)
      integer(c_size_t), intent(in), value :: max_len
      integer(c_size_t) :: length
@@ -175,8 +197,8 @@ interface
      !
      import
      implicit none
-     type(c_ptr), intent(in), value :: car, cdr
-     type(c_ptr) :: pair
+     type(scm_t), intent(in), value :: car, cdr
+     type(scm_t) :: pair
    end function scm_cons
 
    function scm_eol () result (empty) bind (c, name="guile_macro_scm_eol")
@@ -185,7 +207,7 @@ interface
      !
      import
      implicit none
-     type(c_ptr) :: empty
+     type(scm_t) :: empty
    end function scm_eol
 
    function scm_car (pair) result (car) bind (c)
@@ -194,8 +216,8 @@ interface
      !
      import
      implicit none
-     type(c_ptr), intent(in), value :: pair
-     type(c_ptr) :: car
+     type(scm_t), intent(in), value :: pair
+     type(scm_t) :: car
    end function scm_car
 
    function scm_cdr (pair) result (cdr) bind (c)
@@ -204,8 +226,8 @@ interface
      !
      import
      implicit none
-     type(c_ptr), intent(in), value :: pair
-     type(c_ptr) :: cdr
+     type(scm_t), intent(in), value :: pair
+     type(scm_t) :: cdr
    end function scm_cdr
 
    function scm_string_to_symbol (string) result (symbol) bind (c)
@@ -214,8 +236,8 @@ interface
      !
      import
      implicit none
-     type(c_ptr), intent(in), value :: string
-     type(c_ptr) :: symbol
+     type(scm_t), intent(in), value :: string
+     type(scm_t) :: symbol
    end function scm_string_to_symbol
 
    function scm_symbol_to_string (symbol) result (string) bind (c)
@@ -224,8 +246,8 @@ interface
      !
      import
      implicit none
-     type(c_ptr), intent(in), value :: symbol
-     type(c_ptr) :: string
+     type(scm_t), intent(in), value :: symbol
+     type(scm_t) :: string
    end function scm_symbol_to_string
 
    function scm_lookup (symbol) result (variable) bind (c)
@@ -234,8 +256,8 @@ interface
      !
      import
      implicit none
-     type(c_ptr), intent(in), value :: symbol
-     type(c_ptr) :: variable
+     type(scm_t), intent(in), value :: symbol
+     type(scm_t) :: variable
    end function scm_lookup
 
    function scm_variable_ref (variable) result (value) bind (c)
@@ -244,8 +266,8 @@ interface
      !
      import
      implicit none
-     type(c_ptr), intent(in), value :: variable
-     type(c_ptr) :: value
+     type(scm_t), intent(in), value :: variable
+     type(scm_t) :: value
    end function scm_variable_ref
 end interface
 
@@ -287,7 +309,7 @@ contains
    function scm_is_true (object) result (yes)
      use iso_c_binding
      implicit none
-     type(c_ptr), intent(in), value :: object
+     type(scm_t), intent(in), value :: object
      logical :: yes
      ! *** end of interface ***
 
@@ -297,7 +319,7 @@ contains
    function scm_is_symbol (object) result (yes)
      use iso_c_binding
      implicit none
-     type(c_ptr), intent(in), value :: object
+     type(scm_t), intent(in), value :: object
      logical :: yes
      ! *** end of interface ***
 
@@ -307,7 +329,7 @@ contains
    function scm_is_string (object) result (yes)
      use iso_c_binding
      implicit none
-     type(c_ptr), intent(in), value :: object
+     type(scm_t), intent(in), value :: object
      logical :: yes
      ! *** end of interface ***
 
@@ -317,7 +339,7 @@ contains
    function scm_is_number (object) result (yes)
      use iso_c_binding
      implicit none
-     type(c_ptr), intent(in), value :: object
+     type(scm_t), intent(in), value :: object
      logical :: yes
      ! *** end of interface ***
 
@@ -327,7 +349,7 @@ contains
    function scm_is_pair (object) result (yes)
      use iso_c_binding
      implicit none
-     type(c_ptr), intent(in), value :: object
+     type(scm_t), intent(in), value :: object
      logical :: yes
      ! *** end of interface ***
 
@@ -337,7 +359,7 @@ contains
    function scm_is_null (object) result (yes)
      use iso_c_binding
      implicit none
-     type(c_ptr), intent(in), value :: object
+     type(scm_t), intent(in), value :: object
      logical :: yes
      ! *** end of interface ***
 
@@ -347,7 +369,7 @@ contains
    function scm_is_exact (object) result (yes)
      use iso_c_binding
      implicit none
-     type(c_ptr), intent(in), value :: object
+     type(scm_t), intent(in), value :: object
      logical :: yes
      ! *** end of interface ***
 
@@ -357,7 +379,7 @@ contains
    function scm_is_inexact (object) result (yes)
      use iso_c_binding
      implicit none
-     type(c_ptr), intent(in), value :: object
+     type(scm_t), intent(in), value :: object
      logical :: yes
      ! *** end of interface ***
 
@@ -369,7 +391,7 @@ contains
     ! Fortran string -> SCM string.
     !
     character(len=*), intent(in) :: for_string
-    type(c_ptr) :: scm_string
+    type(scm_t) :: scm_string
     ! *** end of interface **
 
     integer(c_size_t) :: slen
@@ -385,7 +407,7 @@ contains
     ! The output string is only complete if length <= len(buf) on
     ! output.
     !
-    type(c_ptr) :: string
+    type(scm_t) :: string
     character(len=*), intent(out) :: buf
     integer, intent(out) :: length ! default kind, not an integer(c_size_t)
     ! *** end of interface **
@@ -408,10 +430,10 @@ contains
 
   function lookup (name) result (value)
     character(len=*), intent(in) :: name
-    type(c_ptr) :: value
+    type(scm_t) :: value
     ! *** end of interface **
 
-    type(c_ptr) :: string, symbol, variable
+    type(scm_t) :: string, symbol, variable
 
     string = scm_from_string (name)
     symbol = scm_string_to_symbol (string)
@@ -421,7 +443,7 @@ contains
 
   recursive subroutine display (obj)
     implicit none
-    type(c_ptr), intent(in) :: obj
+    type(scm_t), intent(in) :: obj
     ! *** end of interface **
 
     character(len=128) :: buf
@@ -464,8 +486,8 @@ contains
 
   function test (symbol, object) result (out) bind (c)
     implicit none
-    type(c_ptr), intent(in), value :: symbol, object
-    type(c_ptr) :: out
+    type(scm_t), intent(in), value :: symbol, object
+    type(scm_t) :: out
     ! *** end of interface ***
 
     character(len=16) :: buf
