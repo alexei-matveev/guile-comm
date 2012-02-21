@@ -526,6 +526,22 @@ contains
   end subroutine display
 
   function test (symbol, object) result (out) bind (c)
+    !
+    ! FIXME:  Note that  even though  this funciton  is  BIND(C), when
+    ! compiled  by  Intel  the   resulting  interface  is  NOT  binary
+    ! compatible to
+    !
+    !     intptr_t test (intptr_t symbol, intptr_t object)
+    !
+    ! so that  calling it from C/Guile  will fail. The  call will even
+    ! fail  from Intel,  as  the caller  assumes  the correct  (quoted
+    ! above) type signature.
+    !
+    ! In  effect,  it  appears  that extending  Guile  interpreter  by
+    ! fortran funcitons returning SCM  objects is impossible, since it
+    ! would not work at least  with one compiler. It works though with
+    ! Gfortran.
+    !
     implicit none
     type(scm_t), intent(in), value :: symbol, object
     type(scm_t) :: out
