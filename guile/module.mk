@@ -30,9 +30,15 @@ guile-qm.o = $(GUILE)/guile-qm.o
 GUILE-libguile-comm-impl.o = $(GUILE)/libguile-comm-fint.o
 #UILE-libguile-comm-impl.o = $(GUILE)/libguile-comm-smob.o
 
+#
+# libguile.so does not export many  macros which are part of the Guile
+# API.   The file  guile-api.c implements  some of  them  as functions
+# with guile_macro_ prefix.
+#
 GUILE-libguile-comm-objs = \
         $(GUILE)/libguile-comm.o \
         $(GUILE-libguile-comm-impl.o) \
+        $(GUILE)/guile-api.o \
         $(GUILE)/pi.o \
 
 GUILE-objs = $(GUILE-libguile-comm-objs) \
