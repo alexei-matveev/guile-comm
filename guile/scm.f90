@@ -125,7 +125,7 @@ interface
      integer(c_int) :: yes
    end function guile_macro_scm_is_true
 
-   function scm_from_int (i) result (exact) bind (c)
+   function scm_from_int (i) result (exact) bind (c, name="guile_macro_scm_from_int")
      !
      ! SCM scm_from_int (int i)
      !
