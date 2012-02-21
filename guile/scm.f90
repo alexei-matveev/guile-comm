@@ -15,7 +15,7 @@ interface
      !
      ! SCM scm_symbol_p (SCM obj)
      !
-     use iso_c_binding
+     import
      implicit none
      type(c_ptr), intent(in), value :: object
      type(c_ptr) :: yes
@@ -25,7 +25,7 @@ interface
      !
      ! SCM scm_string_p (SCM obj)
      !
-     use iso_c_binding
+     import
      implicit none
      type(c_ptr), intent(in), value :: object
      type(c_ptr) :: yes
@@ -35,7 +35,7 @@ interface
      !
      ! SCM scm_number_p (SCM obj)
      !
-     use iso_c_binding
+     import
      implicit none
      type(c_ptr), intent(in), value :: object
      type(c_ptr) :: yes
@@ -45,7 +45,7 @@ interface
      !
      ! SCM scm_pair_p (SCM obj)
      !
-     use iso_c_binding
+     import
      implicit none
      type(c_ptr), intent(in), value :: object
      type(c_ptr) :: yes
@@ -55,7 +55,7 @@ interface
      !
      ! SCM scm_null_p (SCM x)
      !
-     use iso_c_binding
+     import
      implicit none
      type(c_ptr), intent(in), value :: object
      type(c_ptr) :: yes
@@ -68,7 +68,7 @@ interface
      !
      ! SCM scm_exact_p (SCM x)
      !
-     use iso_c_binding
+     import
      implicit none
      type(c_ptr), intent(in), value :: object
      type(c_ptr) :: yes
@@ -78,7 +78,7 @@ interface
      !
      ! SCM scm_inexact_p (SCM x)
      !
-     use iso_c_binding
+     import
      implicit none
      type(c_ptr), intent(in), value :: object
      type(c_ptr) :: yes
@@ -97,7 +97,7 @@ interface
      !
      ! int scm_is_true (SCM obj)
      !
-     use iso_c_binding
+     import
      implicit none
      type(c_ptr), intent(in), value :: object
      integer(c_int) :: yes
@@ -107,7 +107,7 @@ interface
      !
      ! SCM scm_from_int (int i)
      !
-     use iso_c_binding
+     import
      implicit none
      integer(c_int), intent(in), value :: i
      type(c_ptr) :: exact
@@ -120,7 +120,7 @@ interface
      !
      ! int scm_from_int (SCM exact)
      !
-     use iso_c_binding
+     import
      implicit none
      type(c_ptr), intent(in), value :: exact
      integer(c_int) :: i
@@ -130,7 +130,7 @@ interface
      !
      ! SCM scm_from_double (double d)
      !
-     use iso_c_binding
+     import
      implicit none
      real(c_double), intent(in), value :: d
      type(c_ptr) :: inexact
@@ -140,7 +140,7 @@ interface
      !
      ! double scm_to_double (SCM inexact)
      !
-     use iso_c_binding
+     import
      implicit none
      type(c_ptr), intent(in), value :: inexact
      real(c_double) :: d
@@ -150,7 +150,7 @@ interface
      !
      ! SCM scm_from_locale_stringn (const char *str, size_t len)
      !
-     use iso_c_binding
+     import
      implicit none
      character(kind=c_char) :: str(*)
      integer(c_size_t), intent(in), value :: len
@@ -161,7 +161,7 @@ interface
      !
      ! size_t scm_to_locale_stringbuf (SCM str, char *buf, size_t max_len)
      !
-     use iso_c_binding
+     import
      implicit none
      type(c_ptr), intent(in), value :: str
      character(kind=c_char) :: buf(*)
@@ -173,7 +173,7 @@ interface
      !
      ! SCM scm_cons (SCM car, SCM cdr)
      !
-     use iso_c_binding
+     import
      implicit none
      type(c_ptr), intent(in), value :: car, cdr
      type(c_ptr) :: pair
@@ -183,7 +183,7 @@ interface
      !
      ! SCM SCM_EOL
      !
-     use iso_c_binding
+     import
      implicit none
      type(c_ptr) :: empty
    end function scm_eol
@@ -192,7 +192,7 @@ interface
      !
      ! SCM scm_car (SCM pair)
      !
-     use iso_c_binding
+     import
      implicit none
      type(c_ptr), intent(in), value :: pair
      type(c_ptr) :: car
@@ -202,7 +202,7 @@ interface
      !
      ! SCM scm_cdr (SCM pair)
      !
-     use iso_c_binding
+     import
      implicit none
      type(c_ptr), intent(in), value :: pair
      type(c_ptr) :: cdr
@@ -212,7 +212,7 @@ interface
      !
      ! SCM scm_string_to_symbol (SCM string)
      !
-     use iso_c_binding
+     import
      implicit none
      type(c_ptr), intent(in), value :: string
      type(c_ptr) :: symbol
@@ -222,7 +222,7 @@ interface
      !
      ! SCM scm_symbol_to_string (SCM symbol)
      !
-     use iso_c_binding
+     import
      implicit none
      type(c_ptr), intent(in), value :: symbol
      type(c_ptr) :: string
@@ -232,7 +232,7 @@ interface
      !
      ! SCM scm_lookup (SCM name)
      !
-     use iso_c_binding
+     import
      implicit none
      type(c_ptr), intent(in), value :: symbol
      type(c_ptr) :: variable
@@ -242,7 +242,7 @@ interface
      !
      ! SCM scm_variable_ref (SCM var)
      !
-     use iso_c_binding
+     import
      implicit none
      type(c_ptr), intent(in), value :: variable
      type(c_ptr) :: value
