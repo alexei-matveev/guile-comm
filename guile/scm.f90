@@ -269,6 +269,17 @@ interface
      type(scm_t), intent(in), value :: variable
      type(scm_t) :: value
    end function scm_variable_ref
+
+   function scm_define (name, val) result (var) bind (c)
+     !
+     ! SCM scm_define (SCM name, SCM val)
+     !
+     ! use iso_c_binding
+     import
+     implicit none
+     type(scm_t), intent(in), value :: name, val
+     type(scm_t) :: var
+   end function scm_define
 end interface
 
 !
@@ -304,7 +315,27 @@ public :: scm_from_string       ! string -> SCM string
 public :: scm_cons              ! SCM car -> SCM cdr -> SCM pair
 public :: scm_eol               ! () -> SCM empty
 
+!
+! Setting/quering environment:
+!
+public :: scm_define            ! SCM name -> SCM value -> SCM variable
+public :: scm_f_define          ! name -> SCM value -> SCM variable
+public :: scm_lookup            ! SCM name -> SCM variable
+public :: scm_variable_ref      ! SCM varibale -> SCM value
+
+public :: test
+
 contains
+
+   function scm_f_define (name, val) result (var)
+     implicit none
+     character(len=*), intent(in) :: name
+     type(scm_t), intent(in), value :: val
+     type(scm_t) :: var
+     ! *** end of interface ***
+
+     var = scm_define (scm_string_to_symbol (scm_from_string (name)), val)
+   end function scm_f_define
 
    function scm_is_true (object) result (yes)
      use iso_c_binding
@@ -492,6 +523,7 @@ contains
 
     character(len=16) :: buf
     integer :: slen
+    type(scm_t) :: var
 
     call display (symbol)
     write (*, *) ! newline
@@ -507,6 +539,10 @@ contains
     out = scm_cons (scm_eol(), scm_cons (lookup (buf(1:slen)), object))
     call display (out)
     write (*, *)
+
+    var = scm_f_define ("*string*", scm_from_string ("hello, world!"))
+    var = scm_f_define ("*double*", scm_from_double (0.3d0))
+    var = scm_f_define ("*integer*", scm_from_int (7))
   end function test
 
 end module scm
