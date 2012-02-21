@@ -9,7 +9,7 @@
   (if (file-exists? conf)
       (load conf)))
 
-(use-modules (ice-9 syncase))		; syntax-rules
+(use-modules (ice-9 syncase))           ; syntax-rules
 
 ;;
 ;; This is artificial intelligence guessing temp dir:
@@ -20,8 +20,8 @@
                     (getenv "TEMP")    ; not sure if ever used
                     "/scratch")))      ; if none is set use this
     (string-append prefix "/" (getenv "USER") "-"
-		   (input-base-name input) "-"
-		   (number->string (getpid)))))
+                   (input-base-name input) "-"
+                   (number->string (getpid)))))
 
 ;;
 ;; This emulates the behaviour of the "runpg" bash script that tells
@@ -47,11 +47,11 @@
     ((critical world expr1 expr2 ...)
      (let loop ((rank 0)) ; quote this sexp with ' to check the transcription
        (if (< rank (comm-size world))
-	   (begin
-	     (if (= rank (comm-rank world)) ; My turn to ...
-		 (begin expr1 expr2 ...))   ; ... evaluate expresssions.
-	     (comm-barrier world)	    ; Others wait here.
-	     (loop (+ rank 1))))))))
+           (begin
+             (if (= rank (comm-rank world)) ; My turn to ...
+                 (begin expr1 expr2 ...))   ; ... evaluate expresssions.
+             (comm-barrier world)           ; Others wait here.
+             (loop (+ rank 1))))))))
 
 ;;
 ;; Now that we are responsible for creating directories ourselves we
@@ -60,13 +60,13 @@
 ;;
 (define (maybe-mkdir! world dirname) ; dirname is the same for all ranks
   (critical world
-	    (if (not (file-exists? dirname))
-		(mkdir dirname))))
+            (if (not (file-exists? dirname))
+                (mkdir dirname))))
 
 (define (maybe-rm-rf! world dirname) ; dirname is the same for all ranks
   (critical world
-	    (if (file-exists? dirname)
-		(system (string-append "rm -rf " dirname))))) ; DANGEROUS !!!
+            (if (file-exists? dirname)
+                (system (string-append "rm -rf " dirname))))) ; DANGEROUS !!!
 
 ;;
 ;; Set TTFSTMP to something different from $PWD to avoid polluting
@@ -79,11 +79,11 @@
     (begin
       (setenv "TTFSINPUT" input)
       (setenv "TTFSOUTPUTDIR" output-dir)
-      (setenv "TTFSTMP" temp-dir)	; dont ask in guess-temp-dir
-      (maybe-mkdir! world temp-dir)	; create temp-dir
+      (setenv "TTFSTMP" temp-dir)       ; dont ask in guess-temp-dir
+      (maybe-mkdir! world temp-dir)     ; create temp-dir
       (maybe-mkdir! world output-dir)
-      (qm-run world)			; this invokes the program
-      (maybe-rm-rf! world temp-dir))))	; remove temp-dir, DANGEROUS !!!
+      (qm-run world)                    ; this invokes the program
+      (maybe-rm-rf! world temp-dir))))  ; remove temp-dir, DANGEROUS !!!
 
 ;;
 ;; Intialize MPI, get the world communicator:
@@ -96,8 +96,8 @@
 (let loop ((inputs (cdr (command-line)))) ; first argument is the program name
   (if (not (null? inputs))
       (begin
-	(run world (car inputs))	; this invokes the program
-	(loop (cdr inputs)))))
+        (run world (car inputs))        ; this invokes the program
+        (loop (cdr inputs)))))
 
 ;;
 ;; No more communication after that:
