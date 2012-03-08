@@ -282,6 +282,72 @@ interface
    end function scm_define
 end interface
 
+interface scm_call
+   function scm_call_0 (proc) result (res) bind (c)
+     !
+     ! SCM scm_call_0 (SCM proc)
+     !
+     import
+     implicit none
+     type(scm_t), intent(in), value :: proc
+     type(scm_t) :: res
+   end function scm_call_0
+
+   function scm_call_1 (proc, arg1) result (res) bind (c)
+     !
+     ! SCM scm_call_1 (SCM proc, SCM arg1)
+     !
+     import
+     implicit none
+     type(scm_t), intent(in), value :: proc, arg1
+     type(scm_t) :: res
+   end function scm_call_1
+
+   function scm_call_2 (proc, arg1, arg2) result (res) bind (c)
+     !
+     ! SCM scm_call_2 (SCM proc, SCM arg1, SCM arg2)
+     !
+     import
+     implicit none
+     type(scm_t), intent(in), value :: proc, arg1, arg2
+     type(scm_t) :: res
+   end function scm_call_2
+
+   function scm_call_3 (proc, arg1, arg2, arg3) result (res) bind (c)
+     !
+     ! SCM scm_call_3 (SCM proc, SCM arg1, SCM arg2, SCM arg3)
+     !
+     import
+     implicit none
+     type(scm_t), intent(in), value :: proc, arg1, arg2, arg3
+     type(scm_t) :: res
+   end function scm_call_3
+
+   function scm_call_4 (proc, arg1, arg2, arg3, arg4) result (res) bind (c)
+     !
+     ! SCM scm_call_4 (SCM proc, SCM arg1, SCM arg2, SCM arg3, SCM arg4)
+     !
+     import
+     implicit none
+     type(scm_t), intent(in), value :: proc, arg1, arg2, arg3, arg4
+     type(scm_t) :: res
+   end function scm_call_4
+
+   function scm_call_5 (proc, arg1, arg2, arg3, arg4, arg5) result (res) bind (c)
+     !
+     ! SCM scm_call_4 (SCM proc, SCM arg1, SCM arg2, SCM arg3, SCM arg4, SCM arg5)
+     !
+     import
+     implicit none
+     type(scm_t), intent(in), value :: proc, arg1, arg2, arg3, arg4, arg5
+     type(scm_t) :: res
+   end function scm_call_5
+
+   !
+   ! FIXME: extend up to 9 if necessary.
+   !
+end interface
+
 !
 ! Predicates:
 !
@@ -314,6 +380,11 @@ public :: scm_from_string       ! string -> SCM string
 
 public :: scm_cons              ! SCM car -> SCM cdr -> SCM pair
 public :: scm_eol               ! () -> SCM empty
+
+!
+! Procedures:
+!
+public :: scm_call              ! SCM proc -> ... -> SCM res
 
 !
 ! Setting/quering environment:
