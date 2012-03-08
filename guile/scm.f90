@@ -106,6 +106,16 @@ interface
      type(scm_t) :: yes
    end function scm_inexact_p
 
+   function scm_list_p (obj) result (yes) bind (c)
+     !
+     ! SCM scm_list_p (SCM obj)
+     !
+     import
+     implicit none
+     type(scm_t), intent(in), value :: obj
+     type(scm_t) :: yes
+   end function scm_list_p
+
    !
    ! Type constructors/accessors, integers, doubles, strings,
    ! logicals, lists:
@@ -229,6 +239,16 @@ interface
      type(scm_t), intent(in), value :: pair
      type(scm_t) :: cdr
    end function scm_cdr
+
+   function scm_length (list) result (length) bind (c)
+     !
+     ! SCM scm_length (SCM list)
+     !
+     import
+     implicit none
+     type(scm_t), intent(in), value :: list
+     type(scm_t) :: length
+   end function scm_length
 
    function scm_string_to_symbol (string) result (symbol) bind (c)
      !
@@ -361,6 +381,8 @@ public :: scm_is_true           ! SCM obj -> logical
 public :: scm_is_exact          ! SCM obj -> logical
 public :: scm_is_inexact        ! SCM obj -> logical
 
+public :: scm_list_p            ! SCM obj -> SCM logical
+
 !
 ! Accessors:
 !
@@ -370,6 +392,7 @@ public :: scm_to_stringbuf      ! SCM string -> (Maybe string, integer)
 
 public :: scm_car               ! SCM pair -> SCM car
 public :: scm_cdr               ! SCM pair -> SCM cdr
+public :: scm_length            ! SCM list -> SCM int
 
 !
 ! Constructors:
