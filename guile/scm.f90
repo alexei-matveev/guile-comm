@@ -411,10 +411,10 @@ public :: scm_call              ! SCM proc -> ... -> SCM res
 !
 ! Setting/quering environment:
 !
-public :: scm_define            ! SCM name -> SCM value -> SCM variable
-public :: scm_f_define          ! name -> SCM value -> SCM variable
-public :: scm_lookup            ! SCM name -> SCM variable
-public :: scm_variable_ref      ! SCM varibale -> SCM value
+public :: scm_define            ! SCM symbol -> SCM value -> SCM variable
+public :: scm_f_define          ! string -> SCM value -> SCM variable
+public :: scm_lookup            ! SCM symbol -> SCM variable
+public :: scm_variable_ref      ! SCM variable -> SCM value
 
 public :: test
 
