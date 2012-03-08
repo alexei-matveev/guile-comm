@@ -399,6 +399,7 @@ public :: scm_length            ! SCM list -> SCM int
 public :: scm_from_int          ! integer -> SCM int
 public :: scm_from_double       ! double -> SCM double
 public :: scm_from_string       ! string -> SCM string
+public :: scm_string_to_symbol  ! SCM string -> SCM symbol
 
 public :: scm_cons              ! SCM car -> SCM cdr -> SCM pair
 public :: scm_eol               ! () -> SCM empty
