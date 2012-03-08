@@ -294,7 +294,6 @@ interface
      !
      ! SCM scm_define (SCM name, SCM val)
      !
-     ! use iso_c_binding
      import
      implicit none
      type(scm_t), intent(in), value :: name, val
@@ -432,7 +431,6 @@ contains
    end function scm_f_define
 
    function scm_is_true (object) result (yes)
-     use iso_c_binding
      implicit none
      type(scm_t), intent(in), value :: object
      logical :: yes
@@ -442,7 +440,6 @@ contains
    end function scm_is_true
 
    function scm_is_symbol (object) result (yes)
-     use iso_c_binding
      implicit none
      type(scm_t), intent(in), value :: object
      logical :: yes
@@ -452,7 +449,6 @@ contains
    end function scm_is_symbol
 
    function scm_is_string (object) result (yes)
-     use iso_c_binding
      implicit none
      type(scm_t), intent(in), value :: object
      logical :: yes
@@ -462,7 +458,6 @@ contains
    end function scm_is_string
 
    function scm_is_number (object) result (yes)
-     use iso_c_binding
      implicit none
      type(scm_t), intent(in), value :: object
      logical :: yes
@@ -472,7 +467,6 @@ contains
    end function scm_is_number
 
    function scm_is_pair (object) result (yes)
-     use iso_c_binding
      implicit none
      type(scm_t), intent(in), value :: object
      logical :: yes
@@ -482,7 +476,6 @@ contains
    end function scm_is_pair
 
    function scm_is_null (object) result (yes)
-     use iso_c_binding
      implicit none
      type(scm_t), intent(in), value :: object
      logical :: yes
@@ -492,7 +485,6 @@ contains
    end function scm_is_null
 
    function scm_is_exact (object) result (yes)
-     use iso_c_binding
      implicit none
      type(scm_t), intent(in), value :: object
      logical :: yes
@@ -502,7 +494,6 @@ contains
    end function scm_is_exact
 
    function scm_is_inexact (object) result (yes)
-     use iso_c_binding
      implicit none
      type(scm_t), intent(in), value :: object
      logical :: yes
