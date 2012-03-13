@@ -125,7 +125,7 @@ interface
    ! FIXME: Guile API exports a macro for some of these, we added a
    ! function, see guile-api.c:
    !
-   function guile_macro_scm_is_true (object) result (yes) bind (c)
+   function guile_macro_scm_is_true (object) result (yes) bind (c, name="scm_is_true")
      !
      ! int scm_is_true (SCM obj)
      !
@@ -211,7 +211,7 @@ interface
      type(scm_t) :: pair
    end function scm_cons
 
-   function scm_eol () result (empty) bind (c, name="guile_macro_scm_eol")
+   function scm_eol () result (empty) bind (c)
      !
      ! SCM SCM_EOL
      !
