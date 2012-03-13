@@ -44,7 +44,9 @@ GUILE-libguile-comm-objs = \
 GUILE-objs = $(GUILE-libguile-comm-objs) \
         $(guile-qm.o)
 
-$(libguile-comm.a): $(GUILE-libguile-comm-objs)
+GUILE-fobjs = $(GUILE)/scm.o
+
+$(libguile-comm.a): $(GUILE-libguile-comm-objs) $(GUILE-fobjs)
 	$(AR) ruv $@  $(^)
 	$(RANLIB) $@
 
@@ -63,6 +65,7 @@ GUILE-clean:
 # include dependencies:
 #
 cobjs += $(GUILE-objs)
+f90objs += $(GUILE-fobjs)
 
 #
 # This is also a top-level (global) target, extend the list
