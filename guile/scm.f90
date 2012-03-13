@@ -413,23 +413,12 @@ public :: scm_call              ! SCM proc -> ... -> SCM res
 ! Setting/quering environment:
 !
 public :: scm_define            ! SCM symbol -> SCM value -> SCM variable
-public :: scm_f_define          ! string -> SCM value -> SCM variable
 public :: scm_lookup            ! SCM symbol -> SCM variable
 public :: scm_variable_ref      ! SCM variable -> SCM value
 
 public :: test
 
 contains
-
-   function scm_f_define (name, val) result (var)
-     implicit none
-     character(len=*), intent(in) :: name
-     type(scm_t), intent(in), value :: val
-     type(scm_t) :: var
-     ! *** end of interface ***
-
-     var = scm_define (scm_string_to_symbol (scm_from_string (name)), val)
-   end function scm_f_define
 
    function scm_is_true (object) result (yes)
      implicit none
@@ -545,14 +534,24 @@ contains
     buf(length+1:max_len) = " "
   end subroutine scm_to_stringbuf
 
-  function lookup (name) result (value)
-    character(len=*), intent(in) :: name
+  function define (key, val) result (var)
+    implicit none
+    character(len=*), intent(in) :: key
+    type(scm_t), intent(in), value :: val
+    type(scm_t) :: var
+    ! *** end of interface ***
+
+    var = scm_define (scm_string_to_symbol (scm_from_string (key)), val)
+  end function define
+
+  function lookup (key) result (value)
+    character(len=*), intent(in) :: key
     type(scm_t) :: value
     ! *** end of interface **
 
     type(scm_t) :: string, symbol, variable
 
-    string = scm_from_string (name)
+    string = scm_from_string (key)
     symbol = scm_string_to_symbol (string)
     variable = scm_lookup (symbol)
     value = scm_variable_ref (variable)
@@ -652,9 +651,9 @@ contains
     call display (out)
     write (*, *)
 
-    var = scm_f_define ("*string*", scm_from_string ("hello, world!"))
-    var = scm_f_define ("*double*", scm_from_double (0.3d0))
-    var = scm_f_define ("*integer*", scm_from_int (7))
+    var = define ("*string*", scm_from_string ("hello, world!"))
+    var = define ("*double*", scm_from_double (0.3d0))
+    var = define ("*integer*", scm_from_int (7))
   end function test
 
 end module scm
