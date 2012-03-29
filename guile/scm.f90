@@ -270,6 +270,16 @@ interface
      type(scm_t) :: string
    end function scm_symbol_to_string
 
+   function scm_defined_p (symbol, scope) result (yes) bind (c)
+     !
+     ! SCM scm_defined_p (SCM symbol, SCM scope)
+     !
+     import
+     implicit none
+     type(scm_t), intent(in), value :: symbol, scope
+     type(scm_t) :: yes
+   end function scm_defined_p
+
    function scm_lookup (symbol) result (variable) bind (c)
      !
      ! SCM scm_lookup (SCM name)
@@ -280,6 +290,16 @@ interface
      type(scm_t) :: variable
    end function scm_lookup
 
+   function scm_variable_bound_p (var) result (yes) bind (c)
+     !
+     ! SCM scm_variable_bound_p (SCM var)
+     !
+     import
+     implicit none
+     type(scm_t), intent(in), value :: var
+     type(scm_t) :: yes
+   end function scm_variable_bound_p
+
    function scm_variable_ref (variable) result (value) bind (c)
      !
      ! SCM scm_variable_ref (SCM var)
@@ -289,6 +309,15 @@ interface
      type(scm_t), intent(in), value :: variable
      type(scm_t) :: value
    end function scm_variable_ref
+
+   function scm_undefined () result (undef) bind (c)
+     !
+     ! SCM SCM_UNDEFINED
+     !
+     import
+     implicit none
+     type(scm_t) :: undef
+   end function scm_undefined
 
    function scm_define (name, val) result (var) bind (c)
      !
@@ -413,8 +442,11 @@ public :: scm_call              ! SCM proc -> ... -> SCM res
 ! Setting/quering environment:
 !
 public :: scm_define            ! SCM symbol -> SCM value -> SCM variable
+public :: scm_defined_p         ! SCM symbol -> SCM scope -> SCM bool
 public :: scm_lookup            ! SCM symbol -> SCM variable
+public :: scm_variable_bound_p  ! SCM variable -> SCM bool
 public :: scm_variable_ref      ! SCM variable -> SCM value
+public :: scm_undefined         ! () -> SCM_UNDEFINED
 
 public :: test
 
