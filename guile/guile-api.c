@@ -8,8 +8,9 @@ int (scm_is_symbol) (SCM obj);
 
 int (scm_is_null) (SCM obj);
 
-// FIXME: this one returns a constant:
+// FIXME: these ones return constants:
 SCM scm_eol (void);
+SCM scm_undefined (void);
 
 SCM guile_macro_scm_from_int (int i)
 {
@@ -39,4 +40,9 @@ int (scm_is_null) (SCM obj)
 SCM scm_eol ()
 {
   return SCM_EOL;
+}
+
+SCM scm_undefined ()
+{
+  return SCM_UNDEFINED;
 }
