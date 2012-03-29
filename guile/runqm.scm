@@ -85,23 +85,25 @@
       (qm-run world)                    ; this invokes the program
       (maybe-rm-rf! world temp-dir))))  ; remove temp-dir, DANGEROUS !!!
 
-;;
-;; Intialize MPI, get the world communicator:
-;;
-(define world (qm-init))
+(define (main argv)
+  ;;
+  ;; Intialize MPI, get the world communicator:
+  ;;
+  (define world (qm-init))
 
-;;
-;; Actually run the program for all inputs in the command line:
-;;
-(let loop ((inputs (cdr (command-line)))) ; first argument is the program name
-  (if (not (null? inputs))
-      (begin
-        (run world (car inputs))        ; this invokes the program
-        (loop (cdr inputs)))))
+  ;;
+  ;; Actually run the program for all inputs in the command line:
+  ;;
+  (let loop ((inputs argv))            ; so far argv == list of inputs
+    (if (not (null? inputs))
+        (begin
+          (run world (car inputs))      ; this invokes the program
+          (loop (cdr inputs)))))
 
-;;
-;; No more communication after that:
-;;
-(qm-finalize world)
+  ;;
+  ;; No more communication after that:
+  ;;
+  (qm-finalize world))
 
+(main (cdr (command-line)))             ; first argument is the program name
 ;; Default options for vim:sw=2:expandtab:smarttab:autoindent:syntax=scheme
