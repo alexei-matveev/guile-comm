@@ -328,6 +328,18 @@ interface
      type(scm_t), intent(in), value :: name, val
      type(scm_t) :: var
    end function scm_define
+
+   function scm_c_define_gsubr (name, req, opt, rst, fcn) result (proc) bind (c)
+     !
+     ! SCM scm_c_define_gsubr (const char *name, int req, int opt, int rst, fcn)
+     !
+     import
+     implicit none
+     character(kind=c_char) :: name(*) ! null-terminated, of course
+     integer(c_int), intent(in), value :: req, opt, rst
+     type(c_funptr), intent(in), value :: fcn
+     type(scm_t) :: proc
+   end function scm_c_define_gsubr
 end interface
 
 interface scm_call
@@ -447,8 +459,7 @@ public :: scm_lookup            ! SCM symbol -> SCM variable
 public :: scm_variable_bound_p  ! SCM variable -> SCM bool
 public :: scm_variable_ref      ! SCM variable -> SCM value
 public :: scm_undefined         ! () -> SCM_UNDEFINED
-
-public :: test
+public :: scm_define_gsubr      ! (character, integer, integer, integer, c_funptr) -> SCM proc
 
 contains
 
@@ -565,6 +576,22 @@ contains
     ! clear trailing garbage, FIXME: should we?
     buf(length+1:max_len) = " "
   end subroutine scm_to_stringbuf
+
+   function scm_define_gsubr (name, req, opt, rst, fcn) result (proc)
+     !
+     ! Fortranish wrapper (appends C_NULL_CHAR to name) for
+     !
+     ! SCM scm_c_define_gsubr (const char *name, int req, int opt, int rst, fcn)
+     !
+     implicit none
+     character(len=*) :: name
+     integer(c_int), intent(in) :: req, opt, rst
+     type(c_funptr), intent(in) :: fcn
+     type(scm_t) :: proc
+     ! *** end of interface ***
+
+     proc = scm_c_define_gsubr (name // C_NULL_CHAR, req, opt, rst, fcn)
+   end function scm_define_gsubr
 
   function define (key, val) result (var)
     implicit none
