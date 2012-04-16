@@ -286,7 +286,9 @@
   ;; increasing  f(x) where  the predicate compares  the value  of the
   ;; function to zero. Note that the function "crosses zero" somewhere
   ;; between  x - 1  and x, so  that either of  two might serve  as an
-  ;; approximation for the root.
+  ;; approximation for  the root. Since the values  of a function f(x)
+  ;; are used only as an  input to the predicate less? we redefine the
+  ;; predicate to be a function of x instead.
   ;;
   (if (not (< a b))                     ; FIXME: sanity checks?
       a
