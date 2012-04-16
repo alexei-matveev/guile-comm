@@ -246,21 +246,14 @@
           (length time-series))
 
          ;;
-         ;; Function, f(i), of a position, i, in time series:
-         ;;
-         (f
-          (lambda (i)
-            (let* ((tau (list-ref time-series i))
-                   (work (maybe-work tau)))
-              (cons tau work))))        ; return a pair (tau, work)
-
-         ;;
-         ;; Is (increasing) tau still "less" than (decreasing) work?
+         ;; Function, (less?  i), of  a position, i, in time series to
+         ;; answer  if the (increasing)  tau is still "less"  than the
+         ;; corresponding (decreasing) work:
          ;;
          (less?
-          (lambda (pair)
-            (let ((tau (car pair))
-                  (work (cdr pair)))    ; may return #f for small tau
+          (lambda (i)
+            (let* ((tau (list-ref time-series i))
+                   (work (maybe-work tau))) ; may return #f for small tau
               (if work                  ; if work is a number ...
                   (< tau work)          ; max(tau, work) == work
                   #t)))) ; otherwise tau too small for work to be meaningfull
@@ -270,7 +263,7 @@
          ;; [i, j], usually j = i + 1.  This is position where T(j) >=
          ;; W(T(j)), found by bisection:
          ;;
-         (j (bisect f 0 (- n 1) less?))
+         (j (bisect 0 (- n 1) less?))
 
          ;;
          ;; This is the previous position where T(i) < W(T(i)):
@@ -285,7 +278,7 @@
           (list-range time-series i j)))
     series))
 
-(define (bisect f a b less?)
+(define (bisect a b less?)
   ;;
   ;; For a non-decreasing function  f(x) on an integer interval [a, b]
   ;; find  (the smallest?)   integer x such  that the  predicate less?
@@ -298,14 +291,14 @@
   (if (not (< a b))                     ; FIXME: sanity checks?
       a
       (let ((c (quotient (+ a b) 2)))
-        (if (less? (f c))
-            (bisect f (+ 1 c) b less?)
-            (bisect f a c less?)))))
+        (if (less? c)
+            (bisect (+ 1 c) b less?)
+            (bisect a c less?)))))
 
 (debug-print
- (let ((f (lambda (x) (* x x)))
-       (less? (lambda (f) (< f 100))))
-   (bisect f 0 100 less?)))
+ (let* ((f (lambda (x) (* x x)))
+        (less? (lambda (x) (< (f x) 100))))
+   (bisect 0 100 less?)))
 
 (define (list-range lst a b)
   (drop (take lst (+ 1 b)) a))
