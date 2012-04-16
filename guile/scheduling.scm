@@ -1,15 +1,21 @@
-;;
-;; Module/package systems differ between implementaitons:
-;;
+;;;
+;;; Module/package systems differ between implementaitons:
+;;;
 (cond-expand
- (guile ; primary implementation
+ (guile
+  ;; Primary implementation:
   (use-modules (ice-9 pretty-print))
   (use-modules (srfi srfi-1)))  ; list manipulations
- (else  ; mzscheme, aka PLT Scheme, aka Racket (needs cond-expand
-        ; macro in ~/.mzschmerc):
+
+ (else
+  ;; MzScheme, aka PLT Scheme,  aka Racket (needs cond-expand macro in
+  ;; ~/.mzschmerc):
   (require (lib "1.ss" "srfi"))
   (define (1+ x) (+ 1 x))
   (define (sorted? lst pred?) #t)))     ; FIXME: lies!
+
+;; Use this for debug prints:
+(define (debug-print obj) '(pretty-print obj))
 
 ;;;
 ;;; See "Scheduling malleable and nonmalleable parallel tasks", Walter
@@ -43,8 +49,8 @@
     (+ (* n n n)                        ; O(n**3) work
        (* n n (- p 1)))))               ; O(pn**2) overhead
 
-;; (pretty-print
-;;  (work-function (make-task 100) (make-world 16)))
+(debug-print
+ (work-function (make-task 100) (make-world 16)))
 
 ;;
 ;; We may use these properties for optimizations, like binary search
@@ -74,8 +80,8 @@
          (sizes (map 1+ (iota size))))
     (map make-world sizes)))
 
-;; (pretty-print
-;;  (feasible-partitions (make-world 10)))
+(debug-print
+ (feasible-partitions (make-world 10)))
 
 ;;
 ;; Computes f(a, b) for all pairs from the list of a's and the list of
@@ -84,8 +90,8 @@
 (define (outer f as bs)
   (map (lambda (a) (map (lambda (b) (f a b)) bs)) as))
 
-;; (pretty-print
-;;  (outer cons '(1 2 3) '(a b c d)))
+(debug-print
+ (outer cons '(1 2 3) '(a b c d)))
 
 ;;
 ;; Returns #f if any of evaluations of maybe-proc do so:
@@ -99,19 +105,10 @@
           (and res
                (loop (cdr args) (cons res acc)))))))
 
-;; (define (test n)
-;;   (if (= 0 n)
-;;       #f
-;;       (/ 1 n)))
-
-;; (pretty-print
-;;  (maybe-map test '(1 2 3 4)))
-
-;; (pretty-print
-;;  (maybe-map test '()))
-
-;; (pretty-print
-;;  (maybe-map test '(1 2 0 4)))
+(define (test n) (if (= 0 n) #f (/ 1 n)))
+(debug-print (maybe-map test '(1 2 3 4)))
+(debug-print (maybe-map test '()))
+(debug-print (maybe-map test '(1 2 0 4)))
 
 (define (maybe-find threshold candidates cost size)
   ;;
@@ -122,17 +119,18 @@
   ;;
   ;; O(P) complexity, with P being the number of worker candidates.
   ;;
-  (let ((choose (lambda (new old)
-                  ;;
-                  ;; Check if the new is "more appropriate" than the
-                  ;; old, return one or another depending on that:
-                  ;;
-                  (if (> (cost new) threshold) ; filter them out
-                      old
-                      (if (or (not old) ; not #f, only then compare sizes:
-                              (< (size new) (size old)))
-                          new
-                          old)))))
+  (let ((choose
+         (lambda (new old)
+           ;;
+           ;; Check  if the  new is "more  appropriate" than  the old,
+           ;; return one or another depending on that:
+           ;;
+           (if (> (cost new) threshold) ; filter them out
+               old
+               (if (or (not old)    ; not #f, only then compare sizes:
+                       (< (size new) (size old)))
+                   new
+                   old)))))
     (fold choose #f candidates)))
 
 (define (mpts->npts work-function tasks world)
@@ -212,40 +210,110 @@
          (maybe-bound
           (lambda (tau)
             (let ((w (maybe-work tau)))
-              (and w (max tau w))))))
+              (and w (max tau w)))))
 
-    ;; (pretty-print time-series)
-    (if (regular-case? partitions time-matrix time-series)
-        'do-a-binary-search-maybe?
-        (error "not sorted, check partitions and cost function"))
+         (regular
+          (regular-case? partitions time-matrix time-series)))
 
-    ;;
-    ;; O((MP)**2) complexity, the product of that for maybe-bound and
-    ;; the size of time-series.
-    ;;
-    (let* ((bounds (filter-map maybe-bound time-series))
-           (omega (apply min bounds))
-           (optimal (maybe-find-partitions omega))
-           (times (map cost-function tasks optimal)))
-      (list tasks '@ world '-> optimal times))))
+    (let* ((series
+            (if (not regular)
+                ;;
+                ;; Brute force minimization. O((MP)**2) complexity,
+                ;; the product of that for maybe-bound and the size of
+                ;; time-series:
+                ;;
+                (error "brute force?" time-series)
+                ;;
+                ;; Otherwise use bisection method to bracket the
+                ;; interval. This should return a list of length one
+                ;; or two:
+                ;;
+                (bisect-series maybe-work time-series)))
 
-;; (define (maybe-bisect f a b)
-;;   (let search ((a a)
-;;                (b b)
-;;                (fa (f a))
-;;                (fb (f b)))
-;;     (if (= a b)
-;;         a
-;;         (let ((c (quotient (+ a b) 2))
-;;               (fc (f c)))
-;;           (if )))))
+           (omega
+            (apply min (filter-map maybe-bound series)))
 
-;; (pretty-print
-;;  (mpts->npts work-function
-;;              (map make-task '(0 10 100))
-;;              (make-world 4)))
+           (optimal
+            (maybe-find-partitions omega))
+
+           (times
+            (map cost-function tasks optimal)))
+
+      (list tasks '@ world '-> 'omega: omega 'partitions: optimal 'times: times))))
+
+(define (bisect-series maybe-work time-series)
+  (let* ((n
+          (length time-series))
+
+         ;;
+         ;; Function, f(i), of a position, i, in time series:
+         ;;
+         (f
+          (lambda (i)
+            (let* ((tau (list-ref time-series i))
+                   (work (maybe-work tau)))
+              (cons tau work))))        ; return a pair (tau, work)
+
+         ;;
+         ;; Is (increasing) tau still "less" than (decreasing) work?
+         ;;
+         (less?
+          (lambda (pair)
+            (let ((tau (car pair))
+                  (work (cdr pair)))    ; may return #f for small tau
+              (if work                  ; if work is a number ...
+                  (< tau work)          ; max(tau, work) == work
+                  #t)))) ; otherwise tau too small for work to be meaningfull
+
+         ;;
+         ;; Here we bracket the location of the minima to the interval
+         ;; [i, j], usually j = i + 1.  This is position where T(j) >=
+         ;; W(T(j)), found by bisection:
+         ;;
+         (j (bisect f 0 (- n 1) less?))
+
+         ;;
+         ;; This is the previous position where T(i) < W(T(i)):
+         ;;
+         (i (max (- j 1) 0))
+
+         ;;
+         ;; Somewhere inbetween is the minimum. A shorter time series,
+         ;; ideally a list of length one or two:
+         ;;
+         (series
+          (list-range time-series i j)))
+    series))
+
+(define (bisect f a b less?)
+  ;;
+  ;; For a non-decreasing function  f(x) on an integer interval [a, b]
+  ;; find  (the smallest?)   integer x such  that the  predicate less?
+  ;; does not hold for f(x).  Think of finding a zero of monotonically
+  ;; increasing  f(x) where  the predicate compares  the value  of the
+  ;; function to zero. Note that the function "crosses zero" somewhere
+  ;; between  x - 1  and x, so  that either of  two might serve  as an
+  ;; approximation for the root.
+  ;;
+  (if (not (< a b))                     ; FIXME: sanity checks?
+      a
+      (let ((c (quotient (+ a b) 2)))
+        (if (less? (f c))
+            (bisect f (+ 1 c) b less?)
+            (bisect f a c less?)))))
+
+(debug-print
+ (let ((f (lambda (x) (* x x)))
+       (less? (lambda (f) (< f 100))))
+   (bisect f 0 100 less?)))
+
+(define (list-range lst a b)
+  (drop (take lst (+ 1 b)) a))
+
+(debug-print
+ (list-range '(0 1 2 3 4 5) 2 4))
 
 (pretty-print
  (mpts->npts work-function
              (map make-task '(50 50 50 50 50 100 100 100 100 100))
-             (make-world 40)))
+             (make-world 400)))
