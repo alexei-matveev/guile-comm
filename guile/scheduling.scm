@@ -239,23 +239,19 @@
            (times
             (map cost-function tasks optimal)))
 
-      (list tasks '@ world '-> 'omega: omega 'partitions: optimal 'times: times))))
+      (list tasks '@ world '-> 'omega: omega 'partitions: optimal 'times: (map exact->inexact times)))))
 
 (define (bisect-series maybe-work time-series)
-  (let* ((n
-          (length time-series))
-
-         ;;
-         ;; Function, (less?  i), of  a position, i, in time series to
-         ;; answer  if the (increasing)  tau is still "less"  than the
-         ;; corresponding (decreasing) work:
-         ;;
-         (less?
-          (lambda (i)
-            (let* ((tau (list-ref time-series i))
-                   (work (maybe-work tau))) ; may return #f for small tau
-              (if work                  ; if work is a number ...
-                  (< tau work)          ; max(tau, work) == work
+  (let* ((less?
+          (lambda (tau)
+            ;;
+            ;; Function, (less?  tau), on a time series to answer if
+            ;; the (increasing) tau is still "less" than the
+            ;; corresponding (decreasing) work:
+            ;;
+            (let ((work (maybe-work tau))) ; may return #f for small tau
+              (if work                     ; if work is a number ...
+                  (< tau work)             ; max(tau, work) == work
                   #t)))) ; otherwise tau too small for work to be meaningfull
 
          ;;
@@ -263,7 +259,7 @@
          ;; [i, j], usually j = i + 1.  This is position where T(j) >=
          ;; W(T(j)), found by bisection:
          ;;
-         (j (bisect 0 (- n 1) less?))
+         (j (list-bisect time-series less?))
 
          ;;
          ;; This is the previous position where T(i) < W(T(i)):
@@ -277,6 +273,11 @@
          (series
           (list-range time-series i j)))
     series))
+
+(define (list-bisect lst less?)
+  (let ((n (length lst))
+        (less? (lambda (i) (less? (list-ref lst i)))))
+    (bisect 0 (- n 1) less?)))
 
 (define (bisect a b less?)
   ;;
@@ -310,5 +311,5 @@
 
 (pretty-print
  (mpts->npts work-function
-             (map make-task '(50 50 50 50 50 100 100 100 100 100))
-             (make-world 400)))
+             (map make-task '(50 51 52 53 54 100 101 102 103 104))
+             (make-world 1000)))
