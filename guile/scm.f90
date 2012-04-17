@@ -342,6 +342,50 @@ interface
    end function scm_c_define_gsubr
 end interface
 
+interface scm_list
+   !
+   ! SCM scm_list_1 (SCM e1);
+   ! SCM scm_list_2 (SCM e1, SCM e2);
+   ! SCM scm_list_3 (SCM e1, SCM e2, SCM e3);
+   ! SCM scm_list_4 (SCM e1, SCM e2, SCM e3, SCM e4);
+   ! SCM scm_list_5 (SCM e1, SCM e2, SCM e3, SCM e4, SCM e5);
+   !
+   function scm_list_1 (e1) result (list) bind (c)
+     import
+     implicit none
+     type(scm_t), intent(in), value :: e1
+     type(scm_t) :: list
+   end function scm_list_1
+
+   function scm_list_2 (e1, e2) result (list) bind (c)
+     import
+     implicit none
+     type(scm_t), intent(in), value :: e1, e2
+     type(scm_t) :: list
+   end function scm_list_2
+
+   function scm_list_3 (e1, e2, e3) result (list) bind (c)
+     import
+     implicit none
+     type(scm_t), intent(in), value :: e1, e2, e3
+     type(scm_t) :: list
+   end function scm_list_3
+
+   function scm_list_4 (e1, e2, e3, e4) result (list) bind (c)
+     import
+     implicit none
+     type(scm_t), intent(in), value :: e1, e2, e3, e4
+     type(scm_t) :: list
+   end function scm_list_4
+
+   function scm_list_5 (e1, e2, e3, e4, e5) result (list) bind (c)
+     import
+     implicit none
+     type(scm_t), intent(in), value :: e1, e2, e3, e4, e5
+     type(scm_t) :: list
+   end function scm_list_5
+end interface
+
 interface scm_call
    function scm_call_0 (proc) result (res) bind (c)
      !
