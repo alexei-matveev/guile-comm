@@ -335,7 +335,7 @@ interface
      !
      import
      implicit none
-     character(kind=c_char) :: name(*) ! null-terminated, of course
+     character(kind=c_char), intent(in) :: name(*) ! null-terminated, of course
      integer(c_int), intent(in), value :: req, opt, rst
      type(c_funptr), intent(in), value :: fcn
      type(scm_t) :: proc
