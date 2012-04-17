@@ -9,7 +9,20 @@
   (if (file-exists? conf)
       (load conf)))
 
+;;
+;; Guile Library:
+;;
 (use-modules (ice-9 syncase))           ; syntax-rules
+
+;;
+;; Home-grown modules. This needs %load-path to be extended e.g. as in
+;;
+;; (set! %load-path (cons "~/darcs/ttfs-mac" %load-path))
+;;
+;; It may be convenient to do this in ~/.qmrc.
+;;
+(use-modules ((guile scheduling)
+              #:select (qm-mpts->npts))) ; is called from se_scheduling_module
 
 ;;
 ;; This is artificial intelligence guessing temp dir:
