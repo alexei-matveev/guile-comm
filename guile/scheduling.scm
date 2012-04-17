@@ -3,13 +3,20 @@
 ;;;
 (cond-expand
  (guile
+  ;;
   ;; Primary implementation:
+  ;;
+  (define-module (guile scheduling)
+    #:export (qm-mpts->npts))
+
   (use-modules (ice-9 pretty-print))
   (use-modules (srfi srfi-1)))  ; list manipulations
 
  (else
+  ;;
   ;; MzScheme, aka PLT Scheme,  aka Racket (needs cond-expand macro in
   ;; ~/.mzschmerc):
+  ;;
   (require (lib "1.ss" "srfi"))
   (define (1+ x) (+ 1 x))
   (define (sorted? lst pred?) #t)))     ; FIXME: lies!
@@ -94,7 +101,8 @@
  (outer cons '(1 2 3) '(a b c d)))
 
 ;;
-;; Returns #f if any of evaluations of maybe-proc do so:
+;; Returns #f  if any of evaluations  of maybe-proc do  so.  Note that
+;; this is not an "and-map" which would return the last result or #f.
 ;;
 (define (maybe-map maybe-proc args)
   (let loop ((args args)
@@ -239,7 +247,9 @@
            (times
             (map cost-function tasks optimal)))
 
-      (list tasks '@ world '-> 'omega: omega 'partitions: optimal 'times: (map exact->inexact times)))))
+      ;; (list tasks '@ world '-> 'omega: omega 'partitions: optimal
+      ;; 'times: (map exact->inexact times))
+      (map cons optimal times))))
 
 (define (bisect-series maybe-work time-series)
   (let* ((less?
@@ -309,7 +319,16 @@
 (debug-print
  (list-range '(0 1 2 3 4 5) 2 4))
 
-(pretty-print
+(debug-print
  (mpts->npts work-function
-             (map make-task '(50 51 52 53 54 100 101 102 103 104))
+             (map make-task '(50 50 50 50 50 60 60 60 60 60))
              (make-world 1000)))
+
+;;
+;; This one is  called from PG, expects integer  problem sizes and the
+;; world size:
+;;
+(define (qm-mpts->npts sizes workers)
+  (mpts->npts work-function
+              (map make-task sizes)
+              (make-world workers)))
