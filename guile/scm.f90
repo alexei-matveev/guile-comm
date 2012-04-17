@@ -211,15 +211,6 @@ interface
      type(scm_t) :: pair
    end function scm_cons
 
-   function scm_eol () result (empty) bind (c)
-     !
-     ! SCM SCM_EOL
-     !
-     import
-     implicit none
-     type(scm_t) :: empty
-   end function scm_eol
-
    function scm_car (pair) result (car) bind (c)
      !
      ! SCM scm_car (SCM pair)
@@ -344,12 +335,22 @@ end interface
 
 interface scm_list
    !
+   ! SCM scm_eol (); // returns an empty list
    ! SCM scm_list_1 (SCM e1);
    ! SCM scm_list_2 (SCM e1, SCM e2);
    ! SCM scm_list_3 (SCM e1, SCM e2, SCM e3);
    ! SCM scm_list_4 (SCM e1, SCM e2, SCM e3, SCM e4);
    ! SCM scm_list_5 (SCM e1, SCM e2, SCM e3, SCM e4, SCM e5);
    !
+   function scm_eol () result (empty) bind (c)
+     !
+     ! SCM SCM_EOL; // macro or constant in C
+     !
+     import
+     implicit none
+     type(scm_t) :: empty
+   end function scm_eol
+
    function scm_list_1 (e1) result (list) bind (c)
      import
      implicit none
@@ -487,7 +488,7 @@ public :: scm_from_string       ! string -> SCM string
 public :: scm_string_to_symbol  ! SCM string -> SCM symbol
 
 public :: scm_cons              ! SCM car -> SCM cdr -> SCM pair
-public :: scm_eol               ! () -> SCM empty
+public :: scm_list              ! ... -> SCM list
 
 !
 ! Procedures:
