@@ -124,27 +124,33 @@
 
     (qm-flush-trace world input output-dir)
 
-    (maybe-rm-rf! world temp-dir)))   ; remove temp-dir, DANGEROUS !!!
+    (maybe-rm-rf! world temp-dir)     ; remove temp-dir, DANGEROUS !!!
 
-(define (main argv)
-  ;;
-  ;; Intialize MPI, get the world communicator:
-  ;;
-  (define world (qm-init))
+    ;;
+    ;; Return total  enery, set in global namespace  by qm_run (), see
+    ;; modules/paragauss.f90:
+    ;;
+    *energy*))
 
-  ;;
-  ;; Actually run the program for all inputs in the command line:
-  ;;
-  (let loop ((inputs argv))            ; so far argv == list of inputs
-    (if (not (null? inputs))
-        (begin
-          (run world (car inputs))      ; this invokes the program
-          (loop (cdr inputs)))))
+(define (call-with-qm-world program)
+  (let* ((world (qm-init))          ; intialize MPI, get communicator
+         (result (program world)))  ; run the program, bind result
+    (qm-finalize world)             ; finalize MPI
+    result))                        ; return result
 
+(define (main inputs)
+  (define (program world)
+    ;;
+    ;; A program  that takes a communicator, processes  all inputs and
+    ;; returns a list of results:
+    ;;
+    (map (lambda (x) (run world x)) inputs))
   ;;
-  ;; No more communication after that:
+  ;; Call the program with an MPI comm and return result:
   ;;
-  (qm-finalize world))
+  (call-with-qm-world program))
 
-(main (cdr (command-line)))             ; first argument is the program name
-;; Default options for vim:sw=2:expandtab:smarttab:autoindent:syntax=scheme
+;;
+;; This expression is a list of energies, one per input:
+;;
+(main (cdr (command-line)))       ; first argument is the program name
