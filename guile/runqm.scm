@@ -107,18 +107,24 @@
 ;; working directory with temporary files before running PG:
 ;;
 (define (run world input)
-  (let
-      ((temp-dir (comm-bcast world 0 (guess-temp-dir input))) ; prefer the value at rank 0
-       (output-dir (comm-bcast world 0 (guess-output-dir input))))
-    (begin
-      (setenv "TTFSINPUT" input)
-      (setenv "TTFSOUTPUTDIR" output-dir)
-      (setenv "TTFSTMP" temp-dir)       ; dont ask in guess-temp-dir
-      (maybe-mkdir! world temp-dir)     ; create temp-dir
-      (maybe-mkdir! world output-dir)
-      (qm-run world)                    ; this invokes the program
-      (qm-flush-trace world input output-dir)
-      (maybe-rm-rf! world temp-dir))))  ; remove temp-dir, DANGEROUS !!!
+  (let ((temp-dir
+         (comm-bcast world 0 (guess-temp-dir input))) ; prefer the value at rank 0
+
+        (output-dir
+         (comm-bcast world 0 (guess-output-dir input))))
+
+    (setenv "TTFSINPUT" input)
+    (setenv "TTFSOUTPUTDIR" output-dir)
+    (setenv "TTFSTMP" temp-dir)         ; dont ask in guess-temp-dir
+
+    (maybe-mkdir! world temp-dir)       ; create temp-dir
+    (maybe-mkdir! world output-dir)
+
+    (qm-run world)                      ; this invokes the program
+
+    (qm-flush-trace world input output-dir)
+
+    (maybe-rm-rf! world temp-dir)))   ; remove temp-dir, DANGEROUS !!!
 
 (define (main argv)
   ;;
