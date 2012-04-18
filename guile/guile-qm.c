@@ -41,8 +41,15 @@ guile_qm_finalize (const SCM world)
 static void
 guile_main (void *data, int argc, char **argv)
 {
-    // defines comm-* gsubrs:
-    guile_comm_init_module ();
+  /*
+   * Note  that  the names  defined  here  are  put into  the  private
+   * namespace  of (guile-user)  module. If  you want  to call  any of
+   * these you may need to "steal" it from there by dereferencing them
+   * as e.g. (@@ (guile-user) guile-comm-module-init).
+   *
+   * Calling this will define comm-* gsubrs:
+   */
+    scm_c_define_gsubr ("guile-comm-module-init", 0, 0, 0, guile_comm_module_init);
 
     scm_c_define_gsubr ("qm-init", 0, 0, 0, guile_qm_init);
     scm_c_define_gsubr ("qm-run", 1, 0, 0, guile_qm_run);

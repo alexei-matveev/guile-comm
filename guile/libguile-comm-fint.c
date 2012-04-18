@@ -24,7 +24,7 @@ MPI_Comm scm_to_comm (const SCM comm)
     return MPI_Comm_f2c (scm_to_int (comm));
 }
 
-void guile_comm_init_smob (void)
+void guile_comm_smob_init (void)
 {
     // nothing
 }

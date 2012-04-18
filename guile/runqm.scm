@@ -21,6 +21,14 @@
 ;;
 ;; It may be convenient to do this in ~/.qmrc.
 ;;
+(use-modules ((guile comm)
+              #:select (comm-init
+                        comm-size
+                        comm-rank
+                        comm-bcast
+                        comm-barrier)))
+
+;; This one is called from se_scheduling_module:
 (use-modules ((guile scheduling)
               #:select (qm-mpts->npts))) ; is called from se_scheduling_module
 

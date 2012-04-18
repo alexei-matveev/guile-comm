@@ -25,6 +25,8 @@ static MPI_Datatype MPI_SIZE_T = MPI_UNSIGNED;
 //#error "unknown size_t"
 //#endif
 
+static void init_module (void);
+
 static SCM object_to_string (SCM obj);
 static SCM string_to_object (SCM obj);
 
@@ -375,8 +377,17 @@ scm_from_byte_string (const char *buf, size_t len)
     return string_to_object (str);
 }
 
-void guile_comm_init_module (void)
+SCM guile_comm_module_init (void)
 {
+  init_module ();
+  return SCM_UNSPECIFIED;
+}
+
+static
+void init_module (void)
+{
+    // printf ("Hello from init_module()!\n");
+
     //
     // size_t varies between 32/64 platforms, set MPI_SIZE_T here:
     //
@@ -387,7 +398,7 @@ void guile_comm_init_module (void)
     } else {
         assert (0);
     }
-    guile_comm_init_smob();
+    guile_comm_smob_init();
 
     scm_c_define_gsubr ("comm-init", 1, 0, 0, guile_comm_init);
     scm_c_define_gsubr ("comm-finalize", 0, 0, 0, guile_comm_finalize);
