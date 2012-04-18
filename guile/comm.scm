@@ -12,7 +12,10 @@
    comm-split
    comm-free
    comm-set-name
-   comm-pi))
+   comm-pi
+   critical))                           ; syntax
+
+(use-modules (ice-9 syncase))           ; syntax-rules
 
 ;;
 ;; This name has to be defined  on guile startup, see the C sources of
@@ -25,3 +28,19 @@
 ;; This C-code defines all of the exported symbols:
 ;;
 (guile-comm-module-init)
+
+;;
+;; Evaluate  one or  more expression  for each  rank in  sequence with
+;; comm-barrier  inbetween  (critical world  expr1  expr2  ...) to  be
+;; compared with (begin expr1 expr2 ...)
+;;
+(define-syntax critical
+  (syntax-rules ()
+    ((critical world expr1 expr2 ...)
+     (let loop ((rank 0)) ; quote this sexp with ' to check the transcription
+       (if (< rank (comm-size world))
+           (begin
+             (if (= rank (comm-rank world)) ; My turn to ...
+                 (begin expr1 expr2 ...))   ; ... evaluate expresssions.
+             (comm-barrier world)           ; Others wait here.
+             (loop (+ rank 1))))))))

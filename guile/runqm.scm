@@ -10,11 +10,6 @@
       (load conf)))
 
 ;;
-;; Guile Library:
-;;
-(use-modules (ice-9 syncase))           ; syntax-rules
-
-;;
 ;; Home-grown modules. This needs %load-path to be extended e.g. as in
 ;;
 ;; (set! %load-path (cons "~/darcs/ttfs-mac" %load-path))
@@ -22,10 +17,10 @@
 ;; It may be convenient to do this in ~/.qmrc.
 ;;
 (use-modules ((guile comm)
-              #:select (comm-init
-                        comm-size
+              #:select (comm-bcast
+                        critical
+                        comm-size       ; FIXME: used by syntax critical
                         comm-rank
-                        comm-bcast
                         comm-barrier)))
 
 ;;
@@ -70,22 +65,6 @@
   (cond
     ((string-prefix? "i." input) (string-drop input 2))
     (#t input)))
-
-;;
-;; Evaluate one or more expression for each rank in sequence with
-;; comm-barrier inbetween (critical world expr1 expr2 ...) to be
-;; compared with (begin expr1 expr2 ...)
-;;
-(define-syntax critical
-  (syntax-rules ()
-    ((critical world expr1 expr2 ...)
-     (let loop ((rank 0)) ; quote this sexp with ' to check the transcription
-       (if (< rank (comm-size world))
-           (begin
-             (if (= rank (comm-rank world)) ; My turn to ...
-                 (begin expr1 expr2 ...))   ; ... evaluate expresssions.
-             (comm-barrier world)           ; Others wait here.
-             (loop (+ rank 1))))))))
 
 ;;
 ;; Now that we are responsible for creating directories ourselves we
