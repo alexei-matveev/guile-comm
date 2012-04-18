@@ -28,9 +28,22 @@
                         comm-bcast
                         comm-barrier)))
 
-;; This one is called from se_scheduling_module:
+;;
+;; This  one  is  called  from se_scheduling_module  to  convert  MPTS
+;; problem on behalf of the blocked egiensolver:
+;;
 (use-modules ((guile scheduling)
-              #:select (qm-mpts->npts))) ; is called from se_scheduling_module
+              #:select (qm-mpts->npts)))
+
+;;
+;; One of these, *qm-trace-hook*,  if defined/imported, is called from
+;; scheme_trace_hook() in  PG.  So uncomment  it if you want  a trace.
+;; The counterpart,  qm-flush-trace, will do  nothing if the  trace is
+;; empty:
+;;
+(use-modules ((guile paragauss)
+              #:select (; *qm-trace-hook*
+                        qm-flush-trace)))
 
 ;;
 ;; This is artificial intelligence guessing temp dir:
@@ -104,6 +117,7 @@
       (maybe-mkdir! world temp-dir)     ; create temp-dir
       (maybe-mkdir! world output-dir)
       (qm-run world)                    ; this invokes the program
+      (qm-flush-trace world input output-dir)
       (maybe-rm-rf! world temp-dir))))  ; remove temp-dir, DANGEROUS !!!
 
 (define (main argv)
