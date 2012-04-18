@@ -36,19 +36,20 @@
 ;; Dump trace entries collected during the run in *trace*:
 ;;
 (define (qm-flush-trace world input output-dir)
-  (let* ((size (comm-size world))
-         (rank (comm-rank world))
-         (path (string-append output-dir "/"
-                              input "-"
-                              (number->string size) "-"
-                              (number->string rank))))
-    ;;
-    ;; Write the list of trace entries into a file:
-    ;;
-    (with-output-to-file
-        path
-      (lambda () (pretty-print (reverse *trace*))))
-    ;;
-    ;; Empty list of trace entries:
-    ;;
-    (set! *trace* '())))
+  (if (not (null? *trace*))             ; dont create empty files
+      (let* ((size (comm-size world))
+             (rank (comm-rank world))
+             (path (string-append output-dir "/"
+                                  input "-"
+                                  (number->string size) "-"
+                                  (number->string rank))))
+        ;;
+        ;; Write the list of trace entries into a file:
+        ;;
+        (with-output-to-file
+            path
+          (lambda () (pretty-print (reverse *trace*))))
+        ;;
+        ;; Empty list of trace entries:
+        ;;
+        (set! *trace* '()))))
