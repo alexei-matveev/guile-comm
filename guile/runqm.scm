@@ -17,18 +17,20 @@
 ;; It may be convenient to do this in ~/.qmrc.
 ;;
 (use-modules ((guile comm)
-              #:select (comm-bcast
-                        critical
-                        comm-size       ; FIXME: used by syntax critical
-                        comm-rank
-                        comm-barrier)))
+              #:select
+              (comm-bcast
+               critical
+               comm-size              ; FIXME: used by syntax critical
+               comm-rank
+               comm-barrier)))
 
 ;;
 ;; This  one  is  called  from se_scheduling_module  to  convert  MPTS
 ;; problem on behalf of the blocked egiensolver:
 ;;
 (use-modules ((guile scheduling)
-              #:select (qm-mpts->npts)))
+              #:select
+              (qm-mpts->npts)))
 
 ;;
 ;; One of these, *qm-trace-hook*,  if defined/imported, is called from
@@ -37,8 +39,9 @@
 ;; empty:
 ;;
 (use-modules ((guile paragauss)
-              #:select (; *qm-trace-hook*
-                        qm-flush-trace)))
+              #:select
+              (; *qm-trace-hook*
+               qm-flush-trace)))
 
 ;;
 ;; This is artificial intelligence guessing temp dir:
