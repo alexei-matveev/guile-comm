@@ -37,10 +37,11 @@
 (define-syntax critical
   (syntax-rules ()
     ((critical world expr1 expr2 ...)
-     (let loop ((rank 0)) ; quote this sexp with ' to check the transcription
-       (if (< rank (comm-size world))
-           (begin
-             (if (= rank (comm-rank world)) ; My turn to ...
-                 (begin expr1 expr2 ...))   ; ... evaluate expresssions.
-             (comm-barrier world)           ; Others wait here.
-             (loop (+ rank 1))))))))
+     (let ((w world))
+       (let loop ((rank 0)) ; quote this sexp with ' to check the transcription
+         (if (< rank (comm-size w))
+             (begin
+               (if (= rank (comm-rank w)) ; My turn to ...
+                   (begin expr1 expr2 ...)) ; ... evaluate expresssions.
+               (comm-barrier w)         ; Others wait here.
+               (loop (+ rank 1)))))))))
