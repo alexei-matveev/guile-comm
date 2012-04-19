@@ -76,13 +76,15 @@
 ;;
 (define (maybe-mkdir! world dirname) ; dirname is the same for all ranks
   (critical world
-            (if (not (file-exists? dirname))
-                (mkdir dirname))))
+            (lambda ()
+              (if (not (file-exists? dirname))
+                  (mkdir dirname)))))
 
 (define (maybe-rm-rf! world dirname) ; dirname is the same for all ranks
   (critical world
-            (if (file-exists? dirname)
-                (system (string-append "rm -rf " dirname))))) ; DANGEROUS !!!
+            (lambda ()
+              (if (file-exists? dirname)
+                  (system (string-append "rm -rf " dirname)))))) ; DANGEROUS !!!
 
 ;;
 ;; Set TTFSTMP to something different from $PWD to avoid polluting

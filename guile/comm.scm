@@ -13,9 +13,7 @@
    comm-free
    comm-set-name
    comm-pi
-   critical))                           ; syntax
-
-(use-modules (ice-9 syncase))           ; syntax-rules
+   critical))
 
 ;;
 ;; This name has to be defined  on guile startup, see the C sources of
@@ -30,18 +28,14 @@
 (guile-comm-module-init)
 
 ;;
-;; Evaluate  one or  more expression  for each  rank in  sequence with
-;; comm-barrier  inbetween  (critical world  expr1  expr2  ...) to  be
-;; compared with (begin expr1 expr2 ...)
+;; Call  prog  with  for  each  rank  in  sequence  with  comm-barrier
+;; inbetween:
 ;;
-(define-syntax critical
-  (syntax-rules ()
-    ((critical world expr1 expr2 ...)
-     (let ((w world))
-       (let loop ((rank 0)) ; quote this sexp with ' to check the transcription
-         (if (< rank (comm-size w))
-             (begin
-               (if (= rank (comm-rank w)) ; My turn to ...
-                   (begin expr1 expr2 ...)) ; ... evaluate expresssions.
-               (comm-barrier w)         ; Others wait here.
-               (loop (+ rank 1)))))))))
+(define (critical world prog)
+  (let loop ((rank 0))
+    (if (< rank (comm-size world))
+        (begin
+          (if (= rank (comm-rank world)) ; My turn to ...
+              (prog))                    ; ... execute prog.
+          (comm-barrier world)           ; Others wait here.
+          (loop (+ rank 1))))))
