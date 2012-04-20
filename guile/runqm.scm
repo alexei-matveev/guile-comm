@@ -19,10 +19,7 @@
 (use-modules ((guile comm)
               #:select
               (comm-bcast
-               critical
-               comm-size              ; FIXME: used by syntax critical
-               comm-rank
-               comm-barrier)))
+               critical)))
 
 ;;
 ;; This  one  is  called  from se_scheduling_module  to  convert  MPTS
