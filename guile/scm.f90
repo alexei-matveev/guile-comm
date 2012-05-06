@@ -178,6 +178,17 @@ interface
      real(c_double) :: d
    end function scm_to_double
 
+   function scm_from_latin1_stringn (str, len) result (string) bind (c)
+     !
+     ! SCM scm_from_latin1_stringn (const char *str, size_t len)
+     !
+     import
+     implicit none
+     character(kind=c_char), intent(in) :: str(*)
+     integer(c_size_t), intent(in), value :: len
+     type(scm_t) :: string
+   end function scm_from_latin1_stringn
+
    function scm_from_locale_stringn (str, len) result (string) bind (c)
      !
      ! SCM scm_from_locale_stringn (const char *str, size_t len)
