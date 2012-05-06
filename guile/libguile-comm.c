@@ -67,19 +67,29 @@ guile_comm_set_name (SCM world, SCM name)
 SCM
 guile_comm_init (SCM args) // MPI_Init
 {
-    int argc;
+    int argc, i;
     char **argv;
 
-    argv = scm_i_allocate_string_pointers (args);
-
     // count number of arguments:
-    for (argc = 0; argv[argc]; argc++)
-        ;
+    argc = scm_to_int (scm_length (args));
+
+    argv = malloc ((argc + 1) * sizeof (char *));
+
+    argv[argc] = NULL;
+
+    for (i = 0; i < argc; i++)
+      {
+	argv[i] = scm_to_locale_string (scm_car (args));
+	args = scm_cdr (args);
+      }
 
     int ierr = MPI_Init (&argc, &argv);
     assert (MPI_SUCCESS==ierr);
 
-    // return scm_from_int (ierr);
+    /* FIXME:  In fact  we dont  know  if MPI_Init  replaced the  argv
+       completely   and   who  is   responsible   for  freeing   these
+       resources. So we do not attempt to free them. */
+
     return scm_from_comm (MPI_COMM_WORLD);
 }
 
