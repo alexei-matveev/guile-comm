@@ -184,7 +184,7 @@ interface
      !
      import
      implicit none
-     character(kind=c_char) :: str(*)
+     character(kind=c_char), intent(in) :: str(*)
      integer(c_size_t), intent(in), value :: len
      type(scm_t) :: string
    end function scm_from_locale_stringn
