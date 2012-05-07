@@ -3,11 +3,19 @@
 
 ;;
 ;; Load  user-specific config,  this may  also set  the  %load-path to
-;; search for files/modules:
+;; search for files/modules.  This should  work with both 1.8 and 2.0.
+;; Use  absolute  paths when  extending  %load-path  ---  there is  no
+;; globbing for ~/ at compile time.
 ;;
-(let ((conf (string-append (getenv "HOME") "/.qmrc")))
-  (if (file-exists? conf)
-      (load conf)))
+(cond-expand
+ ((not guile-2) (use-modules (ice-9 syncase)))
+ (else 'nothing)) ; eval-when for 1.8
+
+(eval-when
+ (eval load compile)
+ (let ((conf (string-append (getenv "HOME") "/.qmrc")))
+   (if (file-exists? conf)
+       (load conf))))
 
 ;;
 ;; Home-grown modules. This needs %load-path to be extended e.g. as in
