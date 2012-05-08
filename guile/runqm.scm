@@ -1,12 +1,12 @@
 #!/usr/bin/env guile-qm
 !#
 
-;;
-;; Load  user-specific config,  this may  also set  the  %load-path to
-;; search for files/modules.  This should  work with both 1.8 and 2.0.
-;; Use  absolute  paths when  extending  %load-path  ---  there is  no
-;; globbing for ~/ at compile time.
-;;
+;;;
+;;; Load  user-specific config, this  may also  set the  %load-path to
+;;; search for files/modules.  This should work with both 1.8 and 2.0.
+;;; Use  absolute paths  when  extending %load-path  ---  there is  no
+;;; globbing for ~/ at compile time.
+;;;
 (cond-expand
  ((not guile-2) (use-modules (ice-9 syncase)))
  (else 'nothing)) ; eval-when for 1.8
