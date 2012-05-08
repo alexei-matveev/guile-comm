@@ -110,21 +110,24 @@
 (define (run world input)
   (let ((temp-dir
          (comm-bcast world 0 (guess-temp-dir input))) ; prefer the value at rank 0
-
         (output-dir
          (comm-bcast world 0 (guess-output-dir input))))
-
+    ;;
+    ;; These are not undone later:
+    ;;
     (setenv "TTFSINPUT" input)
     (setenv "TTFSOUTPUTDIR" output-dir)
-
     (maybe-mkdir! world output-dir)
-
+    ;;
+    ;; This creates temp-dir, runs the thunk and removes that dir:
+    ;;
     (with-temp-dir world
                    temp-dir
                    (lambda () (qm-run world))) ; this invokes the program
-
+    ;;
+    ;; Dump trace log, if not empry, into a file:
+    ;;
     (qm-flush-trace world input output-dir)
-
     ;;
     ;; Return total  enery, set in global namespace  by qm_run (), see
     ;; modules/paragauss.f90:
