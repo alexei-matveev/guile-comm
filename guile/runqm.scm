@@ -92,8 +92,20 @@
                   (system (string-append "rm -rf " dirname)))))) ; DANGEROUS !!!
 
 ;;
-;; Set TTFSTMP to something different from $PWD to avoid polluting
-;; working directory with temporary files before running PG:
+;; Call proc without args with a TTFSTMP environment variable pointing
+;; to  a fresh temporary  directory on  each rank  in the  world.  Set
+;; TTFSTMP to something different from $PWD to avoid polluting working
+;; directory with temporary files before running PG:
+;;
+(define (with-temp-dir world dirname proc)
+  (maybe-mkdir! world dirname)          ; make dir on each rank
+  (setenv "TTFSTMP" dirname)            ; FIXME: not unset on exit
+  (let ((result (proc)))                ; call proc, bind result
+    (maybe-rm-rf! world dirname)        ; remove dir, DANGEROUS !!!
+    result))                            ; return result of proc
+
+;;
+;; This actually runs an input:
 ;;
 (define (run world input)
   (let ((temp-dir
@@ -104,16 +116,14 @@
 
     (setenv "TTFSINPUT" input)
     (setenv "TTFSOUTPUTDIR" output-dir)
-    (setenv "TTFSTMP" temp-dir)         ; dont ask in guess-temp-dir
 
-    (maybe-mkdir! world temp-dir)       ; create temp-dir
     (maybe-mkdir! world output-dir)
 
-    (qm-run world)                      ; this invokes the program
+    (with-temp-dir world
+                   temp-dir
+                   (lambda () (qm-run world))) ; this invokes the program
 
     (qm-flush-trace world input output-dir)
-
-    (maybe-rm-rf! world temp-dir)     ; remove temp-dir, DANGEROUS !!!
 
     ;;
     ;; Return total  enery, set in global namespace  by qm_run (), see
@@ -121,6 +131,10 @@
     ;;
     *energy*))
 
+;;
+;; Invoke  (program world)  with  the world  communicator privided  by
+;; qm-init:
+;;
 (define (call-with-qm-world program)
   (let* ((world (qm-init))          ; intialize MPI, get communicator
          (result (program world)))  ; run the program, bind result
