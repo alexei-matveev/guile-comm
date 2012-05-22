@@ -1,3 +1,4 @@
+(use-modules (srfi srfi-1))             ; list manipulation
 (use-modules (ice-9 pretty-print))
 
 ;;;
@@ -31,3 +32,49 @@
   (map (lambda (x) (* x x)) (iota 30)))
 
 (test-eigensolver dimensions)
+
+;;;
+;;; These  are helpers  to  interprete the  data  in per-worker  files
+;;; produced by test-eigensolver:
+;;;
+(define (get-dimensions pairs)
+  (map car pairs))
+
+(define (get-times pairs)
+  (map cdr pairs))
+
+(define (slurp path)
+  (with-input-from-file path read))
+
+(define (sum-all files)
+  (let* ((data (map slurp files))
+         (dims (let ((seq (delete-duplicates (map get-dimensions data))))
+                 (if (= 1 (length seq))
+                     (car seq)
+                     (error "dimensions do not correspond" seq))))
+         (times (map get-times data))
+         (time (apply map + times)))
+    (map cons dims time)))
+
+(define (paste-all files)
+  (let* ((data (map slurp files))
+         (dims (let ((seq (delete-duplicates (map get-dimensions data))))
+                 (if (= 1 (length seq))
+                     (car seq)
+                     (error "dimensions do not correspond" seq))))
+         (times (map get-times data)))
+    (cons dims times)))
+
+(define (write-csv-row row)
+  (display (string-join (map number->string row) ", "))
+  (newline))
+
+;; (pretty-print (sum-all (cdr (command-line))))
+;; (pretty-print (paste-all (cdr (command-line))))
+
+;; (let* ((files (cdr (command-line)))
+;;       (data (paste-all files))
+;;       (header (cons "n" files)))
+;;   (write header)
+;;   (newline)
+;;   (for-each write-csv-row (apply map list data)))
