@@ -4,7 +4,8 @@
 ;;; ./baslib/guile/paragauss.scm
 ;;;
 (define-module (guile paragauss)
-  #:export (*qm-trace-hook*
+  #:export (with-stdout-to-file
+            *qm-trace-hook*
             qm-flush-trace))
 
 (use-modules ((guile comm)
@@ -12,6 +13,26 @@
                         comm-rank)))
 
 (use-modules (ice-9 pretty-print))      ; for qm-flush-trace only
+
+;;;
+;;; Beware that writing to the  same file from multiple workers is not
+;;; going to end good:
+;;;
+(define (with-stdout-to-file file proc)
+  (with-output-to-file file
+    (lambda ()
+      (let ((dup-1 (dup 1))         ; make a dup of the current stdout
+            (fd (fileno (current-output-port))))
+        (dup2 fd 1)     ; close stdout and redirect it to fd
+        (proc)          ; execute thunk with stdout redirected to file
+        (dup2 dup-1 1)  ; close file, stdout to original destination
+        (close dup-1)))))               ; dont leak file descriptors
+
+;; (with-stdout-to-file "a1"
+;;   (lambda ()
+;;     (display "Hi!")
+;;     (newline)))
+
 
 ;;
 ;; In  debug runs  here  we collect  a  list of  tracing entries,  see
