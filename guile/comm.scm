@@ -23,7 +23,7 @@
   (@@ (guile-user) guile-comm-module-init))
 
 ;;
-;; This C-code defines all of the exported symbols:
+;; This C-code defines most of the exported symbols:
 ;;
 (guile-comm-module-init)
 
@@ -39,3 +39,22 @@
               (prog))                    ; ... execute prog.
           (comm-barrier world)           ; Others wait here.
           (loop (+ rank 1))))))
+
+;;;
+;;; Apply selectively func to elements of the list of args if index of
+;;; the element i == k mod n. For other elements just return #f:
+;;;
+;;; (round-robin-map (lambda (i) (* 10 i)) (iota 9) 4 1)
+;;; => (#f 10 #f #f #f 50 #f #f #f)
+;;;
+(define (round-robin-map func args n k)
+  (let loop ((args args)
+             (i 0)
+             (acc '()))
+    (if (null? args)
+        (reverse acc)
+        (let ((res (and (= k (modulo i n))
+                        (func (car args)))))
+          (loop (cdr args)
+                (+ 1 i)
+                (cons res acc))))))
