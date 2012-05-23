@@ -1,3 +1,8 @@
+;;;
+;;; You may need to set GUILE_LOAD_PATH=.. for this to work:
+;;;
+(use-modules (guile comm))
+
 ;(define libguile-comm (dynamic-link "./libguile-comm.so"))
 ;(dynamic-call "guile_comm_init_module" libguile-comm)
 
