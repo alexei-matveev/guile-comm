@@ -2,9 +2,10 @@ This is a guile interpreter with an extension that allows manipulating
 process   groups   (MPI   communicators)   and   basic   inter-process
 communication. To build it execute
 
+    cd guile
     make
 
-in the current directory. Then start the custom interpreter:
+Then start the custom interpreter:
 
     $ export GUILE_LOAD_PATH=..
     $ ./guile-comm
