@@ -79,8 +79,8 @@ guile_comm_init (SCM args) // MPI_Init
 
     for (i = 0; i < argc; i++)
       {
-	argv[i] = scm_to_locale_string (scm_car (args));
-	args = scm_cdr (args);
+        argv[i] = scm_to_locale_string (scm_car (args));
+        args = scm_cdr (args);
       }
 
     int ierr = MPI_Init (&argc, &argv);
