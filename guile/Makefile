@@ -15,9 +15,9 @@ ifndef RANLIB
 endif
 
 # some spell them as CCFLAGS:
-CFLAGS += $(CCFLAGS)
+CFLAGS += $(CCFLAGS) $(shell pkg-config --cflags guile-2.0)
 
-LIBS=`pkg-config --libs guile-1.8`
+LIBS=$(shell pkg-config --libs guile-2.0)
 
 all: guile-comm
 
